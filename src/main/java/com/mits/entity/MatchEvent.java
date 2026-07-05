@@ -26,19 +26,30 @@ public class MatchEvent {
     private Match match;
 
     @ManyToOne
+    @JoinColumn(name = "team_id")
+    private Team team;
+
+    @ManyToOne
     @JoinColumn(name = "player_id")
     private Player player;
 
     public MatchEvent() {
     }
 
-    public MatchEvent(Long id, EventType eventType, String eventTime,
-                      String description, Match match, Player player) {
+    public MatchEvent(Long id,
+                      EventType eventType,
+                      String eventTime,
+                      String description,
+                      Match match,
+                      Team team,
+                      Player player) {
+
         this.id = id;
         this.eventType = eventType;
         this.eventTime = eventTime;
         this.description = description;
         this.match = match;
+        this.team = team;
         this.player = player;
     }
 
@@ -80,6 +91,14 @@ public class MatchEvent {
 
     public void setMatch(Match match) {
         this.match = match;
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
     }
 
     public Player getPlayer() {
