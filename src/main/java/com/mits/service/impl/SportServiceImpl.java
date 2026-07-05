@@ -1,0 +1,55 @@
+package com.mits.service.impl;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.mits.entity.Sport;
+import com.mits.repository.SportRepository;
+import com.mits.service.SportService;
+
+@Service
+public class SportServiceImpl implements SportService {
+
+    private final SportRepository sportRepository;
+
+    public SportServiceImpl(SportRepository sportRepository) {
+        this.sportRepository = sportRepository;
+    }
+
+    @Override
+    public Sport createSport(Sport sport) {
+        return sportRepository.save(sport);
+    }
+
+    @Override
+    public Sport getSportById(Long id) {
+        return sportRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public List<Sport> getAllSports() {
+        return sportRepository.findAll();
+    }
+
+    @Override
+    public Sport updateSport(Long id, Sport sport) {
+
+        Sport existingSport = sportRepository.findById(id).orElse(null);
+
+        if (existingSport != null) {
+            existingSport.setSportName(sport.getSportName());
+            existingSport.setDescription(sport.getDescription());
+
+            return sportRepository.save(existingSport);
+        }
+
+        return null;
+    }
+
+    @Override
+    public void deleteSport(Long id) {
+        sportRepository.deleteById(id);
+    }
+
+}
