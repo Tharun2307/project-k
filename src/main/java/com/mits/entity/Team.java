@@ -12,7 +12,7 @@ public class Team {
     @Column(nullable = false)
     private String teamName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sport_id", nullable = false)
     private Sport sport;
 

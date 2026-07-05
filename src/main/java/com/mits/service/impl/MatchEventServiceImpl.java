@@ -40,7 +40,8 @@ public class MatchEventServiceImpl implements MatchEventService {
         if (existingEvent != null) {
 
             existingEvent.setEventType(matchEvent.getEventType());
-            existingEvent.setMinute(matchEvent.getMinute());
+            existingEvent.setEventTime(matchEvent.getEventTime());
+            existingEvent.setDescription(matchEvent.getDescription());
             existingEvent.setMatch(matchEvent.getMatch());
             existingEvent.setPlayer(matchEvent.getPlayer());
 
