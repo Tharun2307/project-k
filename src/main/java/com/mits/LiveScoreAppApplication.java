@@ -10,4 +10,4 @@ public class LiveScoreAppApplication {
 		SpringApplication.run(LiveScoreAppApplication.class, args);
 	}
 
-}
+} 

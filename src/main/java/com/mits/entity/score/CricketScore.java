@@ -1,65 +1,67 @@
 package com.mits.entity.score;
 
-import jakarta.persistence.Column;
+import com.mits.entity.Match;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "cricket_scores")
 public class CricketScore extends Score {
 
-    @Column(nullable = false)
-    private int runs;
+    // Team 1 Fields
+    private int team1Runs;
+    private int team1Wickets;
 
-    @Column(nullable = false)
-    private int wickets;
+    // Team 2 Fields
+    private int team2Runs;
+    private int team2Wickets;
 
-    @Column(nullable = false)
-    private String overs;
-
-    @Column(nullable = false)
+    // Match Fields
+    private double overs;
     private int extras;
-
-    private Integer target;
-
-    @Column(nullable = false)
+    private int target;
     private int innings;
 
     public CricketScore() {
     }
 
-    public CricketScore(Long id, int runs, int wickets, String overs,
-                        int extras, Integer target, int innings) {
-        setId(id);
-        this.runs = runs;
-        this.wickets = wickets;
-        this.overs = overs;
-        this.extras = extras;
-        this.target = target;
-        this.innings = innings;
+    // --- Explicit Getters and Setters ---
+
+    public int getTeam1Runs() {
+        return team1Runs;
     }
 
-    public int getRuns() {
-        return runs;
+    public void setTeam1Runs(int team1Runs) {
+        this.team1Runs = team1Runs;
     }
 
-    public void setRuns(int runs) {
-        this.runs = runs;
+    public int getTeam1Wickets() {
+        return team1Wickets;
     }
 
-    public int getWickets() {
-        return wickets;
+    public void setTeam1Wickets(int team1Wickets) {
+        this.team1Wickets = team1Wickets;
     }
 
-    public void setWickets(int wickets) {
-        this.wickets = wickets;
+    public int getTeam2Runs() {
+        return team2Runs;
     }
 
-    public String getOvers() {
+    public void setTeam2Runs(int team2Runs) {
+        this.team2Runs = team2Runs;
+    }
+
+    public int getTeam2Wickets() {
+        return team2Wickets;
+    }
+
+    public void setTeam2Wickets(int team2Wickets) {
+        this.team2Wickets = team2Wickets;
+    }
+
+    public double getOvers() {
         return overs;
     }
 
-    public void setOvers(String overs) {
+    public void setOvers(double overs) {
         this.overs = overs;
     }
 
@@ -71,11 +73,11 @@ public class CricketScore extends Score {
         this.extras = extras;
     }
 
-    public Integer getTarget() {
+    public int getTarget() {
         return target;
     }
 
-    public void setTarget(Integer target) {
+    public void setTarget(int target) {
         this.target = target;
     }
 

@@ -40,9 +40,15 @@ public class CricketScoreServiceImpl implements CricketScoreService {
         if (existing != null) {
 
             existing.setMatch(score.getMatch());
-            existing.setRuns(score.getRuns());
-            existing.setWickets(score.getWickets());
+            
+            // --- Updated to use new team-specific fields ---
+            existing.setTeam1Runs(score.getTeam1Runs());
+            existing.setTeam1Wickets(score.getTeam1Wickets());
+            existing.setTeam2Runs(score.getTeam2Runs());
+            existing.setTeam2Wickets(score.getTeam2Wickets());
             existing.setOvers(score.getOvers());
+            
+            // --- Preserving your extra fields ---
             existing.setExtras(score.getExtras());
             existing.setTarget(score.getTarget());
             existing.setInnings(score.getInnings());
