@@ -1,6 +1,6 @@
 package com.mits.entity;
 
-import java.time.LocalDateTime;
+import java.time.LocalDateTime; // ✅ Ensure this is imported
 
 import com.mits.enums.MatchStatus;
 
@@ -26,7 +26,7 @@ public class Match {
     @JoinColumn(name = "team2_id")
     private Team team2;
 
-    private LocalDateTime matchDate;
+    private LocalDateTime matchDate; // ✅ Field is LocalDateTime
 
     @Enumerated(EnumType.STRING)
     private MatchStatus status;
@@ -43,6 +43,8 @@ public class Match {
         this.matchDate = matchDate;
         this.status = status;
     }
+
+    // --- Getters and Setters ---
 
     public Long getId() {
         return id;
@@ -76,6 +78,7 @@ public class Match {
         this.team2 = team2;
     }
 
+    // ✅ FIX: Changed Date to LocalDateTime to match the field type
     public LocalDateTime getMatchDate() {
         return matchDate;
     }

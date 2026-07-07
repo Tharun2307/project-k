@@ -8,22 +8,35 @@ import org.springframework.web.bind.annotation.*;
 
 import com.mits.entity.Player;
 import com.mits.service.PlayerService;
+import com.mits.dto.PlayerRequestDTO;
+import com.mits.entity.Player;
+import com.mits.entity.Team;
+import com.mits.exception.ResourceNotFoundException;
+import com.mits.repository.TeamRepository;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/players")
 public class PlayerController {
 
     private final PlayerService playerService;
+    private final TeamRepository teamRepository;
 
-    public PlayerController(PlayerService playerService) {
+    public PlayerController(PlayerService playerService, TeamRepository teamRepository) {
         this.playerService = playerService;
+        this.teamRepository = teamRepository;
     }
 
     // Create Player
     @PostMapping
-    public ResponseEntity<Player> createPlayer(@RequestBody Player player) {
+    public ResponseEntity<Player> createPlayer(@Valid @RequestBody PlayerRequestDTO dto) {
+        Player player = new Player();
+        player.setPlayerName(dto.getPlayerName());
+        player.setAge(dto.getAge());
+        player.setPosition(dto.getPosition());
+        // Fetch team from database using dto.getTeamId()
         Player savedPlayer = playerService.createPlayer(player);
-        return new ResponseEntity<>(savedPlayer, HttpStatus.CREATED);
+        return ResponseEntity.ok(savedPlayer);
     }
 
     // Get All Players

@@ -8,23 +8,33 @@ import org.springframework.web.bind.annotation.*;
 
 import com.mits.entity.Team;
 import com.mits.service.TeamService;
+import com.mits.dto.TeamRequestDTO;
+import com.mits.entity.Sport;
+import com.mits.exception.ResourceNotFoundException;
+import com.mits.repository.SportRepository;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/teams")
 public class TeamController {
 
     private final TeamService teamService;
+    private final SportRepository sportRepository;
 
-    public TeamController(TeamService teamService) {
+    public TeamController(TeamService teamService, SportRepository sportRepository) {
         this.teamService = teamService;
+        this.sportRepository = sportRepository;
     }
 
     @PostMapping
-    public ResponseEntity<Team> createTeam(@RequestBody Team team) {
+    public ResponseEntity<Team> createTeam(@Valid @RequestBody TeamRequestDTO dto) {
+        // Fetch sport, create team, and save
+        Team team = new Team();
+        team.setTeamName(dto.getTeamName());
+        // Fetch sport from database using dto.getSportId()
         Team savedTeam = teamService.createTeam(team);
-        return new ResponseEntity<>(savedTeam, HttpStatus.CREATED);
+        return ResponseEntity.ok(savedTeam);
     }
-
     @GetMapping
     public ResponseEntity<List<Team>> getAllTeams() {
         return ResponseEntity.ok(teamService.getAllTeams());

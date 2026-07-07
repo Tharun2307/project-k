@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.*;
 
 import com.mits.entity.Sport;
 import com.mits.service.SportService;
+import com.mits.dto.SportRequestDTO;
+import com.mits.entity.Sport;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/sports")
@@ -21,9 +24,13 @@ public class SportController {
 
     // Create Sport
     @PostMapping
-    public ResponseEntity<Sport> createSport(@RequestBody Sport sport) {
+    public ResponseEntity<Sport> createSport(@Valid @RequestBody SportRequestDTO dto) {
+        // Convert DTO to entity and save
+        Sport sport = new Sport();
+        sport.setSportName(dto.getSportName());
+        sport.setDescription(dto.getDescription());
         Sport savedSport = sportService.createSport(sport);
-        return new ResponseEntity<>(savedSport, HttpStatus.CREATED);
+        return ResponseEntity.ok(savedSport);
     }
 
     // Get All Sports

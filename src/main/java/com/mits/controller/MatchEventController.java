@@ -6,8 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.mits.dto.MatchEventRequestDTO;
 import com.mits.entity.MatchEvent;
 import com.mits.service.MatchEventService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/match-events")
@@ -21,9 +23,9 @@ public class MatchEventController {
 
     // Create Match Event
     @PostMapping
-    public ResponseEntity<MatchEvent> createMatchEvent(@RequestBody MatchEvent matchEvent) {
-        MatchEvent savedMatchEvent = matchEventService.createMatchEvent(matchEvent);
-        return new ResponseEntity<>(savedMatchEvent, HttpStatus.CREATED);
+    public ResponseEntity<MatchEvent> createMatchEvent(@Valid @RequestBody MatchEventRequestDTO dto) {
+        MatchEvent createdEvent = matchEventService.createMatchEventFromDTO(dto);
+        return ResponseEntity.ok(createdEvent);
     }
 
     // Get All Match Events

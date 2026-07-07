@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.mits.entity.Match;
+import com.mits.exception.ResourceNotFoundException;
 import com.mits.repository.MatchRepository;
 import com.mits.service.MatchService;
 
@@ -24,7 +25,9 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     public Match getMatchById(Long id) {
-        return matchRepository.findById(id).orElse(null);
+        // ✅ Throws 404 if not found
+        return matchRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Match", "id", id));
     }
 
     @Override
@@ -34,25 +37,25 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     public Match updateMatch(Long id, Match match) {
+        // ✅ Throws 404 if not found
+        Match existingMatch = matchRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Match", "id", id));
 
-        Match existingMatch = matchRepository.findById(id).orElse(null);
+        existingMatch.setSport(match.getSport());
+        existingMatch.setTeam1(match.getTeam1());
+        existingMatch.setTeam2(match.getTeam2());
+        existingMatch.setMatchDate(match.getMatchDate());
+        existingMatch.setStatus(match.getStatus());
 
-        if (existingMatch != null) {
-
-            existingMatch.setSport(match.getSport());
-            existingMatch.setTeam1(match.getTeam1());
-            existingMatch.setTeam2(match.getTeam2());
-            existingMatch.setMatchDate(match.getMatchDate());
-            existingMatch.setStatus(match.getStatus());
-
-            return matchRepository.save(existingMatch);
-        }
-
-        return null;
+        return matchRepository.save(existingMatch);
     }
 
     @Override
     public void deleteMatch(Long id) {
+        // ✅ Throws 404 if trying to delete a non-existent match
+        if (!matchRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Match", "id", id);
+        }
         matchRepository.deleteById(id);
     }
 }

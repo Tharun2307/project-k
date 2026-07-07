@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.mits.entity.Player;
+import com.mits.exception.ResourceNotFoundException;
 import com.mits.repository.PlayerRepository;
 import com.mits.service.PlayerService;
 
@@ -24,7 +25,9 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public Player getPlayerById(Long id) {
-        return playerRepository.findById(id).orElse(null);
+        // ✅ Throws 404 if not found
+        return playerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Player", "id", id));
     }
 
     @Override
@@ -34,24 +37,23 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public Player updatePlayer(Long id, Player player) {
+        // ✅ Throws 404 if not found
+        Player existingPlayer = playerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Player", "id", id));
 
-        Player existingPlayer = playerRepository.findById(id).orElse(null);
+        existingPlayer.setPlayerName(player.getPlayerName());
+        existingPlayer.setAge(player.getAge());
+        existingPlayer.setPosition(player.getPosition());
 
-        if (existingPlayer != null) {
-
-            existingPlayer.setPlayerName(player.getPlayerName());
-            existingPlayer.setAge(player.getAge());
-            existingPlayer.setPosition(player.getPosition());
-            existingPlayer.setTeam(player.getTeam());
-
-            return playerRepository.save(existingPlayer);
-        }
-
-        return null;
+        return playerRepository.save(existingPlayer);
     }
 
     @Override
     public void deletePlayer(Long id) {
+        // ✅ Throws 404 if trying to delete a non-existent player
+        if (!playerRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Player", "id", id);
+        }
         playerRepository.deleteById(id);
     }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.mits.entity.Team;
+import com.mits.exception.ResourceNotFoundException;
 import com.mits.repository.TeamRepository;
 import com.mits.service.TeamService;
 
@@ -24,7 +25,9 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Team getTeamById(Long id) {
-        return teamRepository.findById(id).orElse(null);
+        // ✅ Throws 404 if not found
+        return teamRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Team", "id", id));
     }
 
     @Override
@@ -34,22 +37,22 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Team updateTeam(Long id, Team team) {
+        // ✅ Throws 404 if not found
+        Team existingTeam = teamRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Team", "id", id));
 
-        Team existingTeam = teamRepository.findById(id).orElse(null);
+        existingTeam.setTeamName(team.getTeamName());
+        // existingTeam.setSport(team.getSport()); // Uncomment if you allow updating the sport
 
-        if (existingTeam != null) {
-            existingTeam.setTeamName(team.getTeamName());
-           
-            existingTeam.setSport(team.getSport());
-
-            return teamRepository.save(existingTeam);
-        }
-
-        return null;
+        return teamRepository.save(existingTeam);
     }
 
     @Override
     public void deleteTeam(Long id) {
+        // ✅ Throws 404 if trying to delete a non-existent team
+        if (!teamRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Team", "id", id);
+        }
         teamRepository.deleteById(id);
     }
 }
