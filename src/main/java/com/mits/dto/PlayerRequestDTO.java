@@ -22,38 +22,17 @@ public class PlayerRequestDTO {
     @NotNull(message = "Team ID is required")
     private Long teamId;
 
-    public PlayerRequestDTO() {
-    }
+    public PlayerRequestDTO() {}
 
-    public String getPlayerName() {
-        return playerName;
-    }
+    public String getPlayerName() { return playerName; }
+    public void setPlayerName(String playerName) { this.playerName = playerName; }
 
-    public void setPlayerName(String playerName) {
-        this.playerName = playerName;
-    }
+    public int getAge() { return age; }
+    public void setAge(int age) { this.age = age; }
 
-    public int getAge() {
-        return age;
-    }
+    public String getPosition() { return position; }
+    public void setPosition(String position) { this.position = position; }
 
-    public void setAge(int age) {
-        this.age = age;
-    }
-
-    public String getPosition() {
-        return position;
-    }
-
-    public void setPosition(String position) {
-        this.position = position;
-    }
-
-    public Long getTeamId() {
-        return teamId;
-    }
-
-    public void setTeamId(Long teamId) {
-        this.teamId = teamId;
-    }
+    public Long getTeamId() { return teamId; }
+    public void setTeamId(Long teamId) { this.teamId = teamId; }
 }

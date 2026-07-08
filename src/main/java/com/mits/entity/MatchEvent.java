@@ -1,7 +1,5 @@
 package com.mits.entity;
 
-import com.mits.enums.EventType;
-
 import jakarta.persistence.*;
 
 @Entity
@@ -12,9 +10,9 @@ public class MatchEvent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
+    // ✅ MUST BE STRING
     @Column(nullable = false)
-    private EventType eventType;
+    private String eventType;
 
     @Column(nullable = false)
     private String eventTime;
@@ -37,13 +35,12 @@ public class MatchEvent {
     }
 
     public MatchEvent(Long id,
-                      EventType eventType,
+                      String eventType,
                       String eventTime,
                       String description,
                       Match match,
                       Team team,
                       Player player) {
-
         this.id = id;
         this.eventType = eventType;
         this.eventTime = eventTime;
@@ -53,59 +50,27 @@ public class MatchEvent {
         this.player = player;
     }
 
-    public Long getId() {
-        return id;
-    }
+    // --- Getters and Setters ---
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public EventType getEventType() {
-        return eventType;
-    }
+    // ✅ MUST BE STRING
+    public String getEventType() { return eventType; }
+    public void setEventType(String eventType) { this.eventType = eventType; }
 
-    public void setEventType(EventType eventType) {
-        this.eventType = eventType;
-    }
+    public String getEventTime() { return eventTime; }
+    public void setEventTime(String eventTime) { this.eventTime = eventTime; }
 
-    public String getEventTime() {
-        return eventTime;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public void setEventTime(String eventTime) {
-        this.eventTime = eventTime;
-    }
+    public Match getMatch() { return match; }
+    public void setMatch(Match match) { this.match = match; }
 
-    public String getDescription() {
-        return description;
-    }
+    public Team getTeam() { return team; }
+    public void setTeam(Team team) { this.team = team; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Match getMatch() {
-        return match;
-    }
-
-    public void setMatch(Match match) {
-        this.match = match;
-    }
-
-    public Team getTeam() {
-        return team;
-    }
-
-    public void setTeam(Team team) {
-        this.team = team;
-    }
-
-    public Player getPlayer() {
-        return player;
-    }
-
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
+    public Player getPlayer() { return player; }
+    public void setPlayer(Player player) { this.player = player; }
 }

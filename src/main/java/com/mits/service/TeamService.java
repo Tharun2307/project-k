@@ -14,5 +14,4 @@ public interface TeamService {
     Team updateTeam(Long id, Team team);
 
     void deleteTeam(Long id);
-
 }

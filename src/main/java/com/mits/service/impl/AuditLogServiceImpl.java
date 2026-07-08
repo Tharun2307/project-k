@@ -1,9 +1,7 @@
 package com.mits.service.impl;
 
 import java.time.LocalDateTime;
-
 import org.springframework.stereotype.Service;
-
 import com.mits.entity.AuditLog;
 import com.mits.repository.AuditLogRepository;
 import com.mits.service.AuditLogService;
@@ -18,14 +16,18 @@ public class AuditLogServiceImpl implements AuditLogService {
     }
 
     @Override
-    public void log(String action, String username) {
-
-        AuditLog log = new AuditLog();
-
-        log.setAction(action);
-        log.setUsername(username);
-        log.setTimestamp(LocalDateTime.now());
-
-        auditLogRepository.save(log);
+    public void log(String action, String description, String entityName, Long entityId, String username) {
+        AuditLog auditLog = new AuditLog();
+        auditLog.setAction(action);
+        auditLog.setDescription(description);
+        auditLog.setEntityName(entityName);
+        
+        // ✅ FIX: Now setting the entityId so it is not null!
+        auditLog.setEntityId(entityId); 
+        
+        auditLog.setTimestamp(LocalDateTime.now());
+        auditLog.setUsername(username);
+        
+        auditLogRepository.save(auditLog);
     }
 }

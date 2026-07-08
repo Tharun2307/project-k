@@ -1,7 +1,6 @@
 package com.mits.service.impl;
 
 import java.util.List;
-
 import org.springframework.stereotype.Service;
 
 import com.mits.entity.Team;
@@ -25,7 +24,6 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Team getTeamById(Long id) {
-        // ✅ Throws 404 if not found
         return teamRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", id));
     }
@@ -37,19 +35,17 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Team updateTeam(Long id, Team team) {
-        // ✅ Throws 404 if not found
         Team existingTeam = teamRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", id));
 
         existingTeam.setTeamName(team.getTeamName());
-        // existingTeam.setSport(team.getSport()); // Uncomment if you allow updating the sport
+        existingTeam.setSport(team.getSport()); // ✅ Now allows updating the sport
 
         return teamRepository.save(existingTeam);
     }
 
     @Override
     public void deleteTeam(Long id) {
-        // ✅ Throws 404 if trying to delete a non-existent team
         if (!teamRepository.existsById(id)) {
             throw new ResourceNotFoundException("Team", "id", id);
         }

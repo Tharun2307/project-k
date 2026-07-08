@@ -1,7 +1,6 @@
 package com.mits.service;
 
 import java.util.List;
-
 import com.mits.entity.Sport;
 
 public interface SportService {
@@ -15,5 +14,4 @@ public interface SportService {
     Sport updateSport(Long id, Sport sport);
 
     void deleteSport(Long id);
-
 }

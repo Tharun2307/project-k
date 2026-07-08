@@ -1,7 +1,6 @@
 package com.mits.service.impl;
 
 import java.util.List;
-
 import org.springframework.stereotype.Service;
 
 import com.mits.entity.Player;
@@ -25,7 +24,6 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public Player getPlayerById(Long id) {
-        // ✅ Throws 404 if not found
         return playerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Player", "id", id));
     }
@@ -37,20 +35,19 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public Player updatePlayer(Long id, Player player) {
-        // ✅ Throws 404 if not found
         Player existingPlayer = playerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Player", "id", id));
 
         existingPlayer.setPlayerName(player.getPlayerName());
         existingPlayer.setAge(player.getAge());
         existingPlayer.setPosition(player.getPosition());
+        existingPlayer.setTeam(player.getTeam()); // ✅ Allows updating the team
 
         return playerRepository.save(existingPlayer);
     }
 
     @Override
     public void deletePlayer(Long id) {
-        // ✅ Throws 404 if trying to delete a non-existent player
         if (!playerRepository.existsById(id)) {
             throw new ResourceNotFoundException("Player", "id", id);
         }
