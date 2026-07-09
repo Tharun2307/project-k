@@ -50,7 +50,9 @@ public class LiveScoreServiceImpl implements LiveScoreService {
         response.setSportName(match.getSport().getSportName());
         response.setTeam1Name(match.getTeam1().getTeamName());
         response.setTeam2Name(match.getTeam2().getTeamName());
-        response.setStatus(match.getStatus().name()); // Converts Enum to String
+        
+        // ✅ FIX: Added null check for status to prevent NullPointerException
+        response.setStatus(match.getStatus() != null ? match.getStatus().name() : "UPCOMING");
 
         Map<String, Object> scoreDetails = new HashMap<>();
         String sport = match.getSport().getSportName().toUpperCase();

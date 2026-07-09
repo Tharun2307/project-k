@@ -1,13 +1,14 @@
 package com.mits.controller.score;
 
 import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.mits.dto.score.CricketScoreRequestDTO;
 import com.mits.entity.score.CricketScore;
 import com.mits.service.score.CricketScoreService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/cricket-scores")
@@ -20,8 +21,8 @@ public class CricketScoreController {
     }
 
     @PostMapping
-    public ResponseEntity<CricketScore> create(@RequestBody CricketScore score) {
-        return new ResponseEntity<>(service.createScore(score), HttpStatus.CREATED);
+    public ResponseEntity<CricketScore> create(@Valid @RequestBody CricketScoreRequestDTO dto) {
+        return new ResponseEntity<>(service.createScore(dto), HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -31,32 +32,17 @@ public class CricketScoreController {
 
     @GetMapping("/{id}")
     public ResponseEntity<CricketScore> getById(@PathVariable Long id) {
-
-        CricketScore score = service.getScoreById(id);
-
-        if (score == null)
-            return ResponseEntity.notFound().build();
-
-        return ResponseEntity.ok(score);
+        return ResponseEntity.ok(service.getScoreById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CricketScore> update(@PathVariable Long id,
-                                               @RequestBody CricketScore score) {
-
-        CricketScore updated = service.updateScore(id, score);
-
-        if (updated == null)
-            return ResponseEntity.notFound().build();
-
-        return ResponseEntity.ok(updated);
+    public ResponseEntity<CricketScore> update(@PathVariable Long id, @Valid @RequestBody CricketScoreRequestDTO dto) {
+        return ResponseEntity.ok(service.updateScore(id, dto));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id) {
-
         service.deleteScore(id);
-
         return ResponseEntity.ok("Cricket Score deleted successfully.");
     }
 }

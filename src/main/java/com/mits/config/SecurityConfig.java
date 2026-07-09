@@ -53,23 +53,27 @@ public class SecurityConfig {
                                 SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
-                        // Public APIs
+                        // ✅ PUBLIC APIs (No login required)
                         .requestMatchers(
                                 "/auth/login",
+                                "/auth/register",          // ✅ Added: Allow registration
                                 "/live/**",
                                 "/matches/**",
                                 "/sports/**",
+                                "/api/dashboard/public",   // ✅ Added: Public dashboard
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
                                 "/ws/**"
                         ).permitAll()
 
-                        // Event Coordinator only
+                        // ✅ Event Coordinator only (Admin access)
                         .requestMatchers("/admin/**")
                         .hasRole("EVENT_COORDINATOR")
+                        .requestMatchers("/api/dashboard/admin")  // ✅ Added: Admin dashboard
+                        .hasRole("EVENT_COORDINATOR")
 
-                        // Sport Admin only
+                        // ✅ Sport Admin only
                         .requestMatchers("/sport-admin/**")
                         .hasRole("SPORT_ADMIN")
 

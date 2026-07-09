@@ -1,7 +1,9 @@
 package com.mits.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
+
 import com.mits.entity.AuditLog;
 import com.mits.repository.AuditLogRepository;
 import com.mits.service.AuditLogService;
@@ -21,13 +23,36 @@ public class AuditLogServiceImpl implements AuditLogService {
         auditLog.setAction(action);
         auditLog.setDescription(description);
         auditLog.setEntityName(entityName);
-        
-        // ✅ FIX: Now setting the entityId so it is not null!
         auditLog.setEntityId(entityId); 
-        
         auditLog.setTimestamp(LocalDateTime.now());
         auditLog.setUsername(username);
         
         auditLogRepository.save(auditLog);
+    }
+
+    // ✅ NEW: Implementations for fetching logs
+    @Override
+    public List<AuditLog> getAllLogs() {
+        return auditLogRepository.findAll();
+    }
+
+    @Override
+    public List<AuditLog> getLogsByEntityName(String entityName) {
+        return auditLogRepository.findByEntityName(entityName);
+    }
+
+    @Override
+    public List<AuditLog> getLogsByAction(String action) {
+        return auditLogRepository.findByAction(action);
+    }
+
+    @Override
+    public List<AuditLog> getLogsByUsername(String username) {
+        return auditLogRepository.findByUsername(username);
+    }
+
+    @Override
+    public List<AuditLog> getLogsByDateRange(LocalDateTime start, LocalDateTime end) {
+        return auditLogRepository.findByTimestampBetween(start, end);
     }
 }

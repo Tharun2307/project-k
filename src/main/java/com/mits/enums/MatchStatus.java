@@ -4,5 +4,5 @@ public enum MatchStatus {
     UPCOMING,
     LIVE,
     PAUSED,
-    COMPLETED
+    COMPLETED, CANCELLED
 }
