@@ -2,8 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
-
-const Dashboard = () => <div className="p-10 text-2xl text-center">Welcome to the Dashboard! (Module 2)</div>;
+import PublicDashboard from './pages/PublicDashboard'; // ✅ Import the new page
 
 function App() {
   return (
@@ -12,8 +11,12 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="*" element={<Navigate to="/login" />} />
+          
+          {/* ✅ Set PublicDashboard as the default home page */}
+          <Route path="/" element={<PublicDashboard />} /> 
+          <Route path="/dashboard" element={<PublicDashboard />} /> 
+          
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Router>
     </AuthProvider>
