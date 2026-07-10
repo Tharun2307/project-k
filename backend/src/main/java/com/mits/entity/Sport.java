@@ -1,6 +1,10 @@
 package com.mits.entity;
 
 import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class Sport {
@@ -14,6 +18,11 @@ public class Sport {
 
     private String description;
 
+    // ✅ NEW: Link to Users (Many-to-Many)
+    @ManyToMany(mappedBy = "assignedSports")
+    @JsonIgnore
+    private Set<User> admins = new HashSet<>();
+
     public Sport() {
     }
 
@@ -23,27 +32,17 @@ public class Sport {
         this.description = description;
     }
 
-    public Long getId() {
-        return id;
-    }
+    // --- Existing Getters & Setters ---
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getSportName() { return sportName; }
+    public void setSportName(String sportName) { this.sportName = sportName; }
 
-    public String getSportName() {
-        return sportName;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public void setSportName(String sportName) {
-        this.sportName = sportName;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    // ✅ NEW: Getters & Setters for admins
+    public Set<User> getAdmins() { return admins; }
+    public void setAdmins(Set<User> admins) { this.admins = admins; }
 }

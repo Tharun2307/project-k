@@ -1,3 +1,17 @@
-   @tailwind base;
-   @tailwind components;
-   @tailwind utilities;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #f3f4f6;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Dark mode support */
+.dark {
+  background-color: #111827;
+}
+
+.dark body {
+  background-color: #111827;
+}

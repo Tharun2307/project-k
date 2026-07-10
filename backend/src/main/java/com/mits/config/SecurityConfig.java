@@ -62,11 +62,15 @@ public class SecurityConfig {
                         // ✅ PUBLIC APIs (No login required)
                         .requestMatchers(
                                 "/auth/login",
-                                "/auth/register",          // ✅ Added: Allow registration
+                                "/auth/register",
+                                "/auth/create-coordinator",  // ✅ ADDED: Allow creating coordinator
                                 "/live/**",
-                                "/matches/**",
-                                "/sports/**",
-                                "/api/dashboard/public",   // ✅ Added: Public dashboard
+                                "/api/matches/**",           // ✅ FIXED: Added leading slash
+                                "/api/sports/**",            // ✅ FIXED: Added leading slash
+                                "/api/teams/**",             // ✅ ADDED: Public team viewing
+                                "/api/players/**",           // ✅ ADDED: Public player viewing
+                                "/api/dashboard/public",
+                                "/api/live-score/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
@@ -76,7 +80,17 @@ public class SecurityConfig {
                         // ✅ Event Coordinator only (Admin access)
                         .requestMatchers("/admin/**")
                         .hasRole("EVENT_COORDINATOR")
-                        .requestMatchers("/api/dashboard/admin")  // ✅ Added: Admin dashboard
+                        
+                        // ✅ ADDED: Auth admin endpoints
+                        .requestMatchers("/auth/admin/**")
+                        .hasRole("EVENT_COORDINATOR")
+                        
+                        // ✅ ADDED: Dashboard admin
+                        .requestMatchers("/api/dashboard/admin")
+                        .hasRole("EVENT_COORDINATOR")
+                        
+                        // ✅ ADDED: Audit logs
+                        .requestMatchers("/api/audit-logs/**")
                         .hasRole("EVENT_COORDINATOR")
 
                         // ✅ Sport Admin only
@@ -102,6 +116,7 @@ public class SecurityConfig {
 
         return config.getAuthenticationManager();
     }
+    
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
