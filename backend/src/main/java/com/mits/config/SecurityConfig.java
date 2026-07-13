@@ -35,83 +35,71 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider =
-                new DaoAuthenticationProvider();
-
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(customUserDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder);
-
         return authProvider;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
-
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .formLogin(form -> form.disable())
-                .httpBasic(httpBasic -> httpBasic.disable())
-                .authenticationProvider(authenticationProvider())
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-
-                        // ✅ PUBLIC APIs (No login required)
-                        .requestMatchers(
-                                "/auth/login",
-                                "/auth/register",
-                                "/live/**",
-                                "/api/matches/**",           // ✅ FIXED: Added leading slash
-                                "/api/sports/**",            // ✅ FIXED: Added leading slash
-                                "/api/teams/**",             // ✅ ADDED: Public team viewing
-                                "/api/players/**",           // ✅ ADDED: Public player viewing
-                                "/api/live-score/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v3/api-docs/**",
-                                "/ws/**"
-                        ).permitAll()
-
-                        // ✅ Event Coordinator only (Admin access)
-                        .requestMatchers("/admin/**")
-                        .hasRole("EVENT_COORDINATOR")
-                        
-                        // ✅ ADDED: Auth admin endpoints
-                        .requestMatchers("/auth/admin/**")
-                        .hasRole("EVENT_COORDINATOR")
-                         
-
-                        // ✅ Sport Admin only
-                        .requestMatchers("/sport-admin/**")
-                        .hasRole("SPORT_ADMIN")
-
-                        // Everything else
-                        .anyRequest()
-                        .authenticated()
-                )
-                .addFilterBefore(
-                        jwtAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class
-                );
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .formLogin(form -> form.disable())
+            .httpBasic(httpBasic -> httpBasic.disable())
+            .authenticationProvider(authenticationProvider())
+            .sessionManagement(session -> 
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                // ✅ PUBLIC APIs (No login required)
+                .requestMatchers(
+                    "/auth/login",
+                    "/auth/register",
+                    "/auth/create-coordinator",
+                    "/api/matches/**",          // ✅ Covers Cricket & Kabaddi scorecards
+                    "/api/live-score/**",       // ✅ Covers Volleyball scorecard
+                    "/api/sports/**",
+                    "/api/teams/**",
+                    "/api/players/**",
+                    "/ws/**",                   // ✅ WebSocket endpoints
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/v3/api-docs/**"
+                ).permitAll()
+                
+                // ✅ Event Coordinator only (Admin access)
+                .requestMatchers("/admin/**").hasRole("EVENT_COORDINATOR")
+                .requestMatchers("/auth/admin/**").hasRole("EVENT_COORDINATOR")
+                
+                // ✅ Sport Admin only (Umpire access)
+                .requestMatchers("/sport-admin/**").hasRole("SPORT_ADMIN")
+                
+                // Everything else requires authentication
+                .anyRequest().authenticated()
+            )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config)
-            throws Exception {
-
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
     
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174"));
+        
+        // ✅ Allow React dev servers and local HTML testers
+        configuration.setAllowedOrigins(List.of(
+            "http://localhost:5173", 
+            "http://localhost:5174", 
+            "http://localhost:5500",
+            "http://127.0.0.1:5500"
+        ));
+        
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
