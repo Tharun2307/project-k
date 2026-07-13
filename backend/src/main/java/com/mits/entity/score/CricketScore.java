@@ -1,91 +1,88 @@
 package com.mits.entity.score;
 
 import com.mits.entity.Match;
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 
 @Entity
 public class CricketScore extends Score {
 
-    // Team 1 Fields
-    private int team1Runs;
-    private int team1Wickets;
+    // --- Match State ---
+    private int currentInnings; // 1 or 2
+    private int battingTeam;    // 1 or 2 (Which team is currently batting)
+    private int totalOversInInnings; // e.g., 20 for T20, 50 for ODI
 
-    // Team 2 Fields
-    private int team2Runs;
-    private int team2Wickets;
+    // --- Team 1 Stats ---
+    private int team1Runs, team1Wickets, team1Overs, team1Balls;
+    private int team1Extras, team1Wides, team1NoBalls, team1Byes, team1LegByes;
 
-    // Match Fields
-    private double overs;
-    private int extras;
+    // --- Team 2 Stats ---
+    private int team2Runs, team2Wickets, team2Overs, team2Balls;
+    private int team2Extras, team2Wides, team2NoBalls, team2Byes, team2LegByes;
+
+    // --- Calculated Fields ---
     private int target;
-    private int innings;
+    private double currentRunRate;
+    private double requiredRunRate;
+    private String result; // e.g., "Mumbai Indians won by 14 runs"
 
     public CricketScore() {
+        this.currentInnings = 1;
+        this.battingTeam = 1;
+        this.totalOversInInnings = 20; // Default to T20
     }
 
-    // --- Explicit Getters and Setters ---
+    // --- GETTERS AND SETTERS (Generate all for your IDE) ---
+    public int getCurrentInnings() { return currentInnings; }
+    public void setCurrentInnings(int currentInnings) { this.currentInnings = currentInnings; }
+    public int getBattingTeam() { return battingTeam; }
+    public void setBattingTeam(int battingTeam) { this.battingTeam = battingTeam; }
+    public int getTotalOversInInnings() { return totalOversInInnings; }
+    public void setTotalOversInInnings(int totalOversInInnings) { this.totalOversInInnings = totalOversInInnings; }
 
-    public int getTeam1Runs() {
-        return team1Runs;
-    }
+    public int getTeam1Runs() { return team1Runs; }
+    public void setTeam1Runs(int team1Runs) { this.team1Runs = team1Runs; }
+    public int getTeam1Wickets() { return team1Wickets; }
+    public void setTeam1Wickets(int team1Wickets) { this.team1Wickets = team1Wickets; }
+    public int getTeam1Overs() { return team1Overs; }
+    public void setTeam1Overs(int team1Overs) { this.team1Overs = team1Overs; }
+    public int getTeam1Balls() { return team1Balls; }
+    public void setTeam1Balls(int team1Balls) { this.team1Balls = team1Balls; }
+    public int getTeam1Extras() { return team1Extras; }
+    public void setTeam1Extras(int team1Extras) { this.team1Extras = team1Extras; }
+    public int getTeam1Wides() { return team1Wides; }
+    public void setTeam1Wides(int team1Wides) { this.team1Wides = team1Wides; }
+    public int getTeam1NoBalls() { return team1NoBalls; }
+    public void setTeam1NoBalls(int team1NoBalls) { this.team1NoBalls = team1NoBalls; }
+    public int getTeam1Byes() { return team1Byes; }
+    public void setTeam1Byes(int team1Byes) { this.team1Byes = team1Byes; }
+    public int getTeam1LegByes() { return team1LegByes; }
+    public void setTeam1LegByes(int team1LegByes) { this.team1LegByes = team1LegByes; }
 
-    public void setTeam1Runs(int team1Runs) {
-        this.team1Runs = team1Runs;
-    }
+    public int getTeam2Runs() { return team2Runs; }
+    public void setTeam2Runs(int team2Runs) { this.team2Runs = team2Runs; }
+    public int getTeam2Wickets() { return team2Wickets; }
+    public void setTeam2Wickets(int team2Wickets) { this.team2Wickets = team2Wickets; }
+    public int getTeam2Overs() { return team2Overs; }
+    public void setTeam2Overs(int team2Overs) { this.team2Overs = team2Overs; }
+    public int getTeam2Balls() { return team2Balls; }
+    public void setTeam2Balls(int team2Balls) { this.team2Balls = team2Balls; }
+    public int getTeam2Extras() { return team2Extras; }
+    public void setTeam2Extras(int team2Extras) { this.team2Extras = team2Extras; }
+    public int getTeam2Wides() { return team2Wides; }
+    public void setTeam2Wides(int team2Wides) { this.team2Wides = team2Wides; }
+    public int getTeam2NoBalls() { return team2NoBalls; }
+    public void setTeam2NoBalls(int team2NoBalls) { this.team2NoBalls = team2NoBalls; }
+    public int getTeam2Byes() { return team2Byes; }
+    public void setTeam2Byes(int team2Byes) { this.team2Byes = team2Byes; }
+    public int getTeam2LegByes() { return team2LegByes; }
+    public void setTeam2LegByes(int team2LegByes) { this.team2LegByes = team2LegByes; }
 
-    public int getTeam1Wickets() {
-        return team1Wickets;
-    }
-
-    public void setTeam1Wickets(int team1Wickets) {
-        this.team1Wickets = team1Wickets;
-    }
-
-    public int getTeam2Runs() {
-        return team2Runs;
-    }
-
-    public void setTeam2Runs(int team2Runs) {
-        this.team2Runs = team2Runs;
-    }
-
-    public int getTeam2Wickets() {
-        return team2Wickets;
-    }
-
-    public void setTeam2Wickets(int team2Wickets) {
-        this.team2Wickets = team2Wickets;
-    }
-
-    public double getOvers() {
-        return overs;
-    }
-
-    public void setOvers(double overs) {
-        this.overs = overs;
-    }
-
-    public int getExtras() {
-        return extras;
-    }
-
-    public void setExtras(int extras) {
-        this.extras = extras;
-    }
-
-    public int getTarget() {
-        return target;
-    }
-
-    public void setTarget(int target) {
-        this.target = target;
-    }
-
-    public int getInnings() {
-        return innings;
-    }
-
-    public void setInnings(int innings) {
-        this.innings = innings;
-    }
+    public int getTarget() { return target; }
+    public void setTarget(int target) { this.target = target; }
+    public double getCurrentRunRate() { return currentRunRate; }
+    public void setCurrentRunRate(double currentRunRate) { this.currentRunRate = currentRunRate; }
+    public double getRequiredRunRate() { return requiredRunRate; }
+    public void setRequiredRunRate(double requiredRunRate) { this.requiredRunRate = requiredRunRate; }
+    public String getResult() { return result; }
+    public void setResult(String result) { this.result = result; }
 }
