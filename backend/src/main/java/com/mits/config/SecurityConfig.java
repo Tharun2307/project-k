@@ -63,13 +63,11 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/auth/login",
                                 "/auth/register",
-                                "/auth/create-coordinator",  // ✅ ADDED: Allow creating coordinator
                                 "/live/**",
                                 "/api/matches/**",           // ✅ FIXED: Added leading slash
                                 "/api/sports/**",            // ✅ FIXED: Added leading slash
                                 "/api/teams/**",             // ✅ ADDED: Public team viewing
                                 "/api/players/**",           // ✅ ADDED: Public player viewing
-                                "/api/dashboard/public",
                                 "/api/live-score/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -84,14 +82,7 @@ public class SecurityConfig {
                         // ✅ ADDED: Auth admin endpoints
                         .requestMatchers("/auth/admin/**")
                         .hasRole("EVENT_COORDINATOR")
-                        
-                        // ✅ ADDED: Dashboard admin
-                        .requestMatchers("/api/dashboard/admin")
-                        .hasRole("EVENT_COORDINATOR")
-                        
-                        // ✅ ADDED: Audit logs
-                        .requestMatchers("/api/audit-logs/**")
-                        .hasRole("EVENT_COORDINATOR")
+                         
 
                         // ✅ Sport Admin only
                         .requestMatchers("/sport-admin/**")

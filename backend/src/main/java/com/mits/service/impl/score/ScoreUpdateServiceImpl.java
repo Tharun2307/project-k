@@ -10,11 +10,11 @@ import com.mits.entity.score.BadmintonScore;
 import com.mits.entity.score.CricketScore;
 import com.mits.entity.score.KabaddiScore;
 import com.mits.entity.score.VolleyballScore;
-// ✅ REMOVED: import com.mits.enums.EventType;
 import com.mits.repository.score.BadmintonScoreRepository;
 import com.mits.repository.score.CricketScoreRepository;
 import com.mits.repository.score.KabaddiScoreRepository;
 import com.mits.repository.score.VolleyballScoreRepository;
+import com.mits.service.ScoreBroadcastService; // ✅ ADDED
 import com.mits.service.score.ScoreUpdateService;
 
 @Service
@@ -24,17 +24,20 @@ public class ScoreUpdateServiceImpl implements ScoreUpdateService {
     private final VolleyballScoreRepository volleyballScoreRepository;
     private final KabaddiScoreRepository kabaddiScoreRepository;
     private final BadmintonScoreRepository badmintonScoreRepository;
+    private final ScoreBroadcastService scoreBroadcastService; // ✅ ADDED
 
     public ScoreUpdateServiceImpl(
             CricketScoreRepository cricketScoreRepository,
             VolleyballScoreRepository volleyballScoreRepository,
             KabaddiScoreRepository kabaddiScoreRepository,
-            BadmintonScoreRepository badmintonScoreRepository) {
+            BadmintonScoreRepository badmintonScoreRepository,
+            ScoreBroadcastService scoreBroadcastService) { // ✅ ADDED to constructor
 
         this.cricketScoreRepository = cricketScoreRepository;
         this.volleyballScoreRepository = volleyballScoreRepository;
         this.kabaddiScoreRepository = kabaddiScoreRepository;
         this.badmintonScoreRepository = badmintonScoreRepository;
+        this.scoreBroadcastService = scoreBroadcastService;
     }
 
     @Override
@@ -70,17 +73,18 @@ public class ScoreUpdateServiceImpl implements ScoreUpdateService {
             default:
                 break;
         }
+        
+        // ✅ BROADCAST AFTER EVERY SCORE UPDATE
+        scoreBroadcastService.broadcastScoreUpdate(match.getId(), event);
     }
 
     // ---------------- Cricket ----------------
-
     private void updateCricketScore(MatchEvent event, boolean isTeam1) {
         Optional<CricketScore> optionalScore = cricketScoreRepository.findByMatch(event.getMatch());
         if (optionalScore.isEmpty()) return;
 
         CricketScore score = optionalScore.get();
 
-        // ✅ CHANGED: Now using String literals and .toUpperCase() to be case-insensitive
         switch (event.getEventType().toUpperCase()) {
             case "RUN":
                 if (isTeam1) score.setTeam1Runs(score.getTeam1Runs() + 1);
@@ -112,14 +116,12 @@ public class ScoreUpdateServiceImpl implements ScoreUpdateService {
     }
 
     // ---------------- Volleyball ----------------
-
     private void updateVolleyballScore(MatchEvent event, boolean isTeam1) {
         Optional<VolleyballScore> optionalScore = volleyballScoreRepository.findByMatch(event.getMatch());
         if (optionalScore.isEmpty()) return;
 
         VolleyballScore score = optionalScore.get();
 
-        // ✅ CHANGED: Now using String literals
         switch (event.getEventType().toUpperCase()) {
             case "POINT":
             case "ACE":
@@ -136,14 +138,12 @@ public class ScoreUpdateServiceImpl implements ScoreUpdateService {
     }
 
     // ---------------- Kabaddi ----------------
-
     private void updateKabaddiScore(MatchEvent event, boolean isTeam1) {
         Optional<KabaddiScore> optionalScore = kabaddiScoreRepository.findByMatch(event.getMatch());
         if (optionalScore.isEmpty()) return;
 
         KabaddiScore score = optionalScore.get();
 
-        // ✅ CHANGED: Now using String literals
         switch (event.getEventType().toUpperCase()) {
             case "RAID_POINT":
                 if (isTeam1) score.setTeam1Points(score.getTeam1Points() + 1);
@@ -175,14 +175,12 @@ public class ScoreUpdateServiceImpl implements ScoreUpdateService {
     }
 
     // ---------------- Badminton ----------------
-
     private void updateBadmintonScore(MatchEvent event, boolean isTeam1) {
         Optional<BadmintonScore> optionalScore = badmintonScoreRepository.findByMatch(event.getMatch());
         if (optionalScore.isEmpty()) return;
 
         BadmintonScore score = optionalScore.get();
 
-        // ✅ CHANGED: Now using String comparison instead of Enum
         if ("POINT".equalsIgnoreCase(event.getEventType())) {
             if (isTeam1) score.setPlayer1Points(score.getPlayer1Points() + 1);
             else score.setPlayer2Points(score.getPlayer2Points() + 1);

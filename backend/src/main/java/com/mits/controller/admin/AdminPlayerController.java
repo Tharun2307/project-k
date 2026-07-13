@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import com.mits.entity.Player;
 import com.mits.entity.Team;
 import com.mits.service.PlayerService;
+import com.mits.dto.BulkPlayerRequestDTO;
 import com.mits.dto.PlayerRequestDTO;
 import com.mits.exception.ResourceNotFoundException;
 import com.mits.repository.TeamRepository;
@@ -37,6 +38,29 @@ public class AdminPlayerController {
 
         Player savedPlayer = playerService.createPlayer(player);
         return ResponseEntity.ok(savedPlayer);
+    }
+    @PostMapping("/bulk")
+    public ResponseEntity<String> addBulkPlayers(@Valid @RequestBody BulkPlayerRequestDTO bulkDto) {
+        
+        // Fetch the team once using the ID from the wrapper DTO
+        Team team = teamRepository.findById(bulkDto.getTeamId())
+                .orElseThrow(() -> new ResourceNotFoundException("Team", "id", bulkDto.getTeamId()));
+
+        int count = 0;
+        for (PlayerRequestDTO dto : bulkDto.getPlayers()) {
+            Player player = new Player();
+            player.setPlayerName(dto.getPlayerName());
+            player.setAge(dto.getAge());
+            player.setPosition(dto.getPosition());
+            
+            // ✅ Assign the team fetched above to every player
+            player.setTeam(team);
+            
+            playerService.createPlayer(player);
+            count++;
+        }
+
+        return ResponseEntity.ok(count + " players added successfully to " + team.getTeamName());
     }
 
     // Update Player (Event Coordinator Only)

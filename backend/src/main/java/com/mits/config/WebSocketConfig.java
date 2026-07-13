@@ -12,20 +12,18 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        // Enable a simple in-memory message broker
-        // Clients will subscribe to destinations starting with "/topic"
+        // The prefix for topics that the frontend will subscribe to (e.g., /topic/match/1/score)
         config.enableSimpleBroker("/topic");
         
-        // Clients will send messages to destinations starting with "/app" (if needed)
+        // The prefix for messages coming FROM the frontend (not strictly needed for broadcasting, but good practice)
         config.setApplicationDestinationPrefixes("/app");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // WebSocket endpoint that frontend will connect to
-        // SockJS fallback for browsers that don't support WebSocket
+        // The URL the React frontend will use to connect
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*")
-                .withSockJS();
+                .setAllowedOrigins("http://localhost:5173", "http://localhost:5174") // Allow Vite/React ports
+                .withSockJS(); // Enables fallback for older browsers
     }
 }

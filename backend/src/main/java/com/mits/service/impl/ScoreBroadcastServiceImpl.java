@@ -1,6 +1,5 @@
 package com.mits.service.impl;
 
-import com.mits.dto.LiveScoreResponse;
 import com.mits.service.ScoreBroadcastService;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -15,9 +14,10 @@ public class ScoreBroadcastServiceImpl implements ScoreBroadcastService {
     }
 
     @Override
-    public void broadcastScoreUpdate(Long matchId, LiveScoreResponse liveScore) {
+    public void broadcastScoreUpdate(Long matchId, Object scoreData) {
+        // Frontend will listen to this exact path
         String destination = "/topic/match/" + matchId + "/score";
-        messagingTemplate.convertAndSend(destination, liveScore);
-        System.out.println("✅ Score broadcasted to: " + destination);
+        messagingTemplate.convertAndSend(destination, scoreData);
+        System.out.println("✅ Broadcasted to: " + destination);
     }
 }
