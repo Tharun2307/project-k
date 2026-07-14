@@ -1,37 +1,76 @@
 package com.mits.entity.score;
 
 import com.mits.entity.Match;
+import com.mits.entity.score.cricket.BatsmanStats;
+import com.mits.entity.score.cricket.BowlerStats;
+import com.mits.entity.score.cricket.FallOfWicket;
+import com.mits.enums.MatchState;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class CricketScore extends Score {
 
-    // --- Match State ---
-    private int currentInnings; // 1 or 2
-    private int battingTeam;    // 1 or 2 (Which team is currently batting)
-    private int totalOversInInnings; // e.g., 20 for T20, 50 for ODI
+    private int currentInnings;
+    private int battingTeam;
+    private int totalOversInInnings;
 
-    // --- Team 1 Stats ---
     private int team1Runs, team1Wickets, team1Overs, team1Balls;
     private int team1Extras, team1Wides, team1NoBalls, team1Byes, team1LegByes;
 
-    // --- Team 2 Stats ---
     private int team2Runs, team2Wickets, team2Overs, team2Balls;
     private int team2Extras, team2Wides, team2NoBalls, team2Byes, team2LegByes;
 
-    // --- Calculated Fields ---
     private int target;
     private double currentRunRate;
     private double requiredRunRate;
-    private String result; // e.g., "Mumbai Indians won by 14 runs"
+    private String result;
+
+    // ✅ NEW FIELDS FOR ADVANCED SCORING
+    @Enumerated(EnumType.STRING)
+    private MatchState matchState = MatchState.FIRST_INNINGS;
+
+    private int totalLegalBallsTeam1;
+    private int totalLegalBallsTeam2;
+
+    private Long currentStrikerId;
+    private Long currentNonStrikerId;
+    private Long currentBowlerId;
+
+    private int partnershipRuns;
+    private int partnershipBalls;
+
+    @ElementCollection
+    @CollectionTable(name = "cricket_score_batsman_stats", joinColumns = @JoinColumn(name = "score_id"))
+    private List<BatsmanStats> batsmanStatsList = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "cricket_score_bowler_stats", joinColumns = @JoinColumn(name = "score_id"))
+    private List<BowlerStats> bowlerStatsList = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "cricket_score_fow", joinColumns = @JoinColumn(name = "score_id"))
+    @OrderColumn(name = "wicket_number")
+    private List<FallOfWicket> fallOfWicketsList = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "cricket_score_last_over", joinColumns = @JoinColumn(name = "score_id"))
+    @OrderColumn(name = "ball_index")
+    private List<String> lastOverBalls = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "cricket_score_recent_balls", joinColumns = @JoinColumn(name = "score_id"))
+    @OrderColumn(name = "ball_index")
+    private List<String> recentBalls = new ArrayList<>();
 
     public CricketScore() {
         this.currentInnings = 1;
         this.battingTeam = 1;
-        this.totalOversInInnings = 20; // Default to T20
+        this.totalOversInInnings = 20;
     }
 
-    // --- GETTERS AND SETTERS (Generate all for your IDE) ---
+    // --- GETTERS AND SETTERS FOR ALL FIELDS ---
     public int getCurrentInnings() { return currentInnings; }
     public void setCurrentInnings(int currentInnings) { this.currentInnings = currentInnings; }
     public int getBattingTeam() { return battingTeam; }
@@ -85,4 +124,31 @@ public class CricketScore extends Score {
     public void setRequiredRunRate(double requiredRunRate) { this.requiredRunRate = requiredRunRate; }
     public String getResult() { return result; }
     public void setResult(String result) { this.result = result; }
+
+    public MatchState getMatchState() { return matchState; }
+    public void setMatchState(MatchState matchState) { this.matchState = matchState; }
+    public int getTotalLegalBallsTeam1() { return totalLegalBallsTeam1; }
+    public void setTotalLegalBallsTeam1(int totalLegalBallsTeam1) { this.totalLegalBallsTeam1 = totalLegalBallsTeam1; }
+    public int getTotalLegalBallsTeam2() { return totalLegalBallsTeam2; }
+    public void setTotalLegalBallsTeam2(int totalLegalBallsTeam2) { this.totalLegalBallsTeam2 = totalLegalBallsTeam2; }
+    public Long getCurrentStrikerId() { return currentStrikerId; }
+    public void setCurrentStrikerId(Long currentStrikerId) { this.currentStrikerId = currentStrikerId; }
+    public Long getCurrentNonStrikerId() { return currentNonStrikerId; }
+    public void setCurrentNonStrikerId(Long currentNonStrikerId) { this.currentNonStrikerId = currentNonStrikerId; }
+    public Long getCurrentBowlerId() { return currentBowlerId; }
+    public void setCurrentBowlerId(Long currentBowlerId) { this.currentBowlerId = currentBowlerId; }
+    public int getPartnershipRuns() { return partnershipRuns; }
+    public void setPartnershipRuns(int partnershipRuns) { this.partnershipRuns = partnershipRuns; }
+    public int getPartnershipBalls() { return partnershipBalls; }
+    public void setPartnershipBalls(int partnershipBalls) { this.partnershipBalls = partnershipBalls; }
+    public List<BatsmanStats> getBatsmanStatsList() { return batsmanStatsList; }
+    public void setBatsmanStatsList(List<BatsmanStats> batsmanStatsList) { this.batsmanStatsList = batsmanStatsList; }
+    public List<BowlerStats> getBowlerStatsList() { return bowlerStatsList; }
+    public void setBowlerStatsList(List<BowlerStats> bowlerStatsList) { this.bowlerStatsList = bowlerStatsList; }
+    public List<FallOfWicket> getFallOfWicketsList() { return fallOfWicketsList; }
+    public void setFallOfWicketsList(List<FallOfWicket> fallOfWicketsList) { this.fallOfWicketsList = fallOfWicketsList; }
+    public List<String> getLastOverBalls() { return lastOverBalls; }
+    public void setLastOverBalls(List<String> lastOverBalls) { this.lastOverBalls = lastOverBalls; }
+    public List<String> getRecentBalls() { return recentBalls; }
+    public void setRecentBalls(List<String> recentBalls) { this.recentBalls = recentBalls; }
 }
