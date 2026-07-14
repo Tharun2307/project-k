@@ -30,6 +30,8 @@ public class MatchEvent {
 
     @Column(nullable = false)
     private LocalDateTime timestamp;
+    
+    private Integer runs;
 
     // --- KABADDI SPECIFIC FIELDS ---
     private Integer tackledDefendersCount;
@@ -77,4 +79,9 @@ public class MatchEvent {
 
     public Boolean getIsDoOrDie() { return isDoOrDie; }
     public void setIsDoOrDie(Boolean isDoOrDie) { this.isDoOrDie = isDoOrDie; }
+
+	public Integer getRuns() { return runs; }
+	public void setRuns(Integer runs) { this.runs = runs; }
+    
+    
 }
