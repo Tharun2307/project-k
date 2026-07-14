@@ -14,7 +14,7 @@ import com.mits.repository.TeamRepository;
 import com.mits.service.MatchEventService;
 import com.mits.service.MatchService;
 import com.mits.service.score.ScoreUpdateService;
-import com.mits.service.ScoreBroadcastService; // ✅ ADDED
+import com.mits.service.ScoreBroadcastService;
 
 @Service
 public class MatchEventServiceImpl implements MatchEventService {
@@ -24,14 +24,14 @@ public class MatchEventServiceImpl implements MatchEventService {
     private final TeamRepository teamRepository;
     private final PlayerRepository playerRepository;
     private final ScoreUpdateService scoreUpdateService;
-    private final ScoreBroadcastService scoreBroadcastService; // ✅ ADDED
+    private final ScoreBroadcastService scoreBroadcastService;
 
     public MatchEventServiceImpl(MatchEventRepository matchEventRepository, 
                                  MatchService matchService,
                                  TeamRepository teamRepository,
                                  PlayerRepository playerRepository,
                                  ScoreUpdateService scoreUpdateService,
-                                 ScoreBroadcastService scoreBroadcastService) { // ✅ ADDED to constructor
+                                 ScoreBroadcastService scoreBroadcastService) {
         this.matchEventRepository = matchEventRepository;
         this.matchService = matchService;
         this.teamRepository = teamRepository;
@@ -51,6 +51,12 @@ public class MatchEventServiceImpl implements MatchEventService {
         event.setDescription(dto.getDescription());
         event.setEventTime(dto.getEventTime());
 
+        // ✅ CRITICAL FIX: Map the new Kabaddi fields from DTO to Entity
+        event.setTackledDefendersCount(dto.getTackledDefendersCount());
+        event.setIsBonusCrossed(dto.getIsBonusCrossed());
+        event.setDefendersOnCourt(dto.getDefendersOnCourt());
+        event.setIsDoOrDie(dto.getIsDoOrDie());
+
         if (dto.getTeamId() != null) {
             Team team = teamRepository.findById(dto.getTeamId())
                     .orElseThrow(() -> new RuntimeException("Team not found"));
@@ -66,12 +72,10 @@ public class MatchEventServiceImpl implements MatchEventService {
         // 1. Save the event
         MatchEvent savedEvent = matchEventRepository.save(event);
         
-        // 2. Update the actual score in the DB (Cricket/Volleyball/etc.)
+        // 2. Update the actual score in the DB
         scoreUpdateService.updateScore(savedEvent);
         
-        // ✅ 3. BROADCAST THE EVENT VIA WEBSOCKET!
-        // We broadcast the savedEvent. When the frontend receives this, 
-        // it will know a new event happened and can update the UI or fetch the fresh score.
+        // 3. Broadcast the event via WebSocket
         scoreBroadcastService.broadcastScoreUpdate(match.getId(), savedEvent);
         
         return savedEvent;

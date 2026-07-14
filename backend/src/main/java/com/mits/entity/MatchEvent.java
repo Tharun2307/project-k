@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 @Entity
 public class MatchEvent {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -14,7 +15,7 @@ public class MatchEvent {
     private Match match;
 
     @Column(nullable = false)
-    private String eventType;
+    private String eventType; 
 
     @ManyToOne
     @JoinColumn(name = "team_id")
@@ -25,34 +26,55 @@ public class MatchEvent {
     private Player player;
 
     private String description;
-    private String eventTime;
-    
+    private String eventTime; 
+
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
-    // ✅ NEW: Allows flexible runs (e.g., Wide + 3, No Ball + 4)
-    private Integer runs;
+    // --- KABADDI SPECIFIC FIELDS ---
+    private Integer tackledDefendersCount;
+    private Boolean isBonusCrossed;
+    private Integer defendersOnCourt;
+    private Boolean isDoOrDie;
 
     public MatchEvent() {
         this.timestamp = LocalDateTime.now();
     }
 
+    // --- GETTERS AND SETTERS ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
     public Match getMatch() { return match; }
     public void setMatch(Match match) { this.match = match; }
+
     public String getEventType() { return eventType; }
     public void setEventType(String eventType) { this.eventType = eventType; }
+
     public Team getTeam() { return team; }
     public void setTeam(Team team) { this.team = team; }
+
     public Player getPlayer() { return player; }
     public void setPlayer(Player player) { this.player = player; }
+
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
     public String getEventTime() { return eventTime; }
     public void setEventTime(String eventTime) { this.eventTime = eventTime; }
+
     public LocalDateTime getTimestamp() { return timestamp; }
     public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
-    public Integer getRuns() { return runs; }
-    public void setRuns(Integer runs) { this.runs = runs; }
+
+    public Integer getTackledDefendersCount() { return tackledDefendersCount; }
+    public void setTackledDefendersCount(Integer tackledDefendersCount) { this.tackledDefendersCount = tackledDefendersCount; }
+
+    public Boolean getIsBonusCrossed() { return isBonusCrossed; }
+    public void setIsBonusCrossed(Boolean isBonusCrossed) { this.isBonusCrossed = isBonusCrossed; }
+
+    public Integer getDefendersOnCourt() { return defendersOnCourt; }
+    public void setDefendersOnCourt(Integer defendersOnCourt) { this.defendersOnCourt = defendersOnCourt; }
+
+    public Boolean getIsDoOrDie() { return isDoOrDie; }
+    public void setIsDoOrDie(Boolean isDoOrDie) { this.isDoOrDie = isDoOrDie; }
 }

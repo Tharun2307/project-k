@@ -1,51 +1,50 @@
 package com.mits.service.impl.score;
 
 import com.mits.entity.MatchEvent;
-import com.mits.entity.score.CricketScore;
-import com.mits.repository.score.CricketScoreRepository;
-import com.mits.repository.score.VolleyballScoreRepository;
+import com.mits.entity.score.KabaddiScore;
 import com.mits.repository.score.KabaddiScoreRepository;
-import com.mits.repository.score.BadmintonScoreRepository;
-import com.mits.service.ScoreBroadcastService;
 import com.mits.service.score.ScoreUpdateService;
-import com.mits.service.score.cricket.CricketScoringService;
+import com.mits.service.score.kabaddi.KabaddiScoreUpdateService;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
 public class ScoreUpdateServiceImpl implements ScoreUpdateService {
 
-    private final CricketScoreRepository cricketScoreRepository;
-    private final VolleyballScoreRepository volleyballScoreRepository;
     private final KabaddiScoreRepository kabaddiScoreRepository;
-    private final BadmintonScoreRepository badmintonScoreRepository;
-    private final CricketScoringService cricketScoringService;
-    private final ScoreBroadcastService scoreBroadcastService;
+    private final KabaddiScoreUpdateService kabaddiScoreUpdateService;
 
-    public ScoreUpdateServiceImpl(CricketScoreRepository cricketScoreRepository,
-                                  VolleyballScoreRepository volleyballScoreRepository,
-                                  KabaddiScoreRepository kabaddiScoreRepository,
-                                  BadmintonScoreRepository badmintonScoreRepository,
-                                  CricketScoringService cricketScoringService,
-                                  ScoreBroadcastService scoreBroadcastService) {
-        this.cricketScoreRepository = cricketScoreRepository;
-        this.volleyballScoreRepository = volleyballScoreRepository;
+    public ScoreUpdateServiceImpl(
+            KabaddiScoreRepository kabaddiScoreRepository,
+            KabaddiScoreUpdateService kabaddiScoreUpdateService) {
         this.kabaddiScoreRepository = kabaddiScoreRepository;
-        this.badmintonScoreRepository = badmintonScoreRepository;
-        this.cricketScoringService = cricketScoringService;
-        this.scoreBroadcastService = scoreBroadcastService;
+        this.kabaddiScoreUpdateService = kabaddiScoreUpdateService;
     }
 
     @Override
     public void updateScore(MatchEvent event) {
         String sport = event.getMatch().getSport().getSportName().toUpperCase();
 
-        if ("CRICKET".equals(sport)) {
-            Optional<CricketScore> cricketScore = cricketScoreRepository.findByMatch(event.getMatch());
-            cricketScore.ifPresent(score -> cricketScoringService.processCricketEvent(event, score));
-        } 
-        // Add Volleyball/Kabaddi/Badminton cases here as needed
+        if ("KABADDI".equals(sport)) {
+            Optional<KabaddiScore> kabaddiScoreOpt = kabaddiScoreRepository.findByMatch(event.getMatch());
+            kabaddiScoreOpt.ifPresent(score -> {
+                // Determine if the team that triggered the event is Team 1 or Team 2
+                // NOTE: Adjust '.getTeam1()' if your Match entity uses a different field name (e.g., getHomeTeam())
+                boolean isTeam1 = event.getMatch().getTeam1().getId().equals(event.getTeam().getId());
+                kabaddiScoreUpdateService.processEvent(score, event, isTeam1);
+            });
+        }
+        // Add Cricket/Volleyball cases here similarly
+    }
 
-        scoreBroadcastService.broadcastScoreUpdate(event.getMatch().getId(), event);
+    public void reverseScore(MatchEvent event) {
+        String sport = event.getMatch().getSport().getSportName().toUpperCase();
+        if ("KABADDI".equals(sport)) {
+            Optional<KabaddiScore> kabaddiScoreOpt = kabaddiScoreRepository.findByMatch(event.getMatch());
+            kabaddiScoreOpt.ifPresent(score -> {
+                boolean isTeam1 = event.getMatch().getTeam1().getId().equals(event.getTeam().getId());
+                kabaddiScoreUpdateService.reverseEvent(score, event, isTeam1);
+            });
+        }
     }
 }

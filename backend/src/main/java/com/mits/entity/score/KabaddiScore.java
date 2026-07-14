@@ -32,7 +32,6 @@ public class KabaddiScore extends Score {
     @Column(nullable = false)
     private int team2SuperTackles;
 
-    // --- NEW FIELDS ADDED FOR PROFESSIONAL SCORECARD ---
     @Column(nullable = false)
     private int team1TacklePoints;
 
@@ -44,18 +43,21 @@ public class KabaddiScore extends Score {
 
     @Column(nullable = false)
     private int team2AllOuts;
-    // ---------------------------------------------------
+
+    // --- NEW: For Do-or-Die Rule Tracking ---
+    @Column(nullable = false)
+    private int team1ConsecutiveEmptyRaids;
+
+    @Column(nullable = false)
+    private int team2ConsecutiveEmptyRaids;
 
     public KabaddiScore() {
     }
 
-    public KabaddiScore(Long id, int team1Points, int team2Points,
-                        int team1Raids, int team2Raids,
-                        int team1BonusPoints, int team2BonusPoints,
-                        int team1SuperTackles, int team2SuperTackles,
-                        int team1TacklePoints, int team2TacklePoints,
-                        int team1AllOuts, int team2AllOuts) {
-
+    public KabaddiScore(Long id, int team1Points, int team2Points, int team1Raids, int team2Raids,
+                        int team1BonusPoints, int team2BonusPoints, int team1SuperTackles, int team2SuperTackles,
+                        int team1TacklePoints, int team2TacklePoints, int team1AllOuts, int team2AllOuts,
+                        int team1ConsecutiveEmptyRaids, int team2ConsecutiveEmptyRaids) {
         setId(id);
         this.team1Points = team1Points;
         this.team2Points = team2Points;
@@ -69,9 +71,11 @@ public class KabaddiScore extends Score {
         this.team2TacklePoints = team2TacklePoints;
         this.team1AllOuts = team1AllOuts;
         this.team2AllOuts = team2AllOuts;
+        this.team1ConsecutiveEmptyRaids = team1ConsecutiveEmptyRaids;
+        this.team2ConsecutiveEmptyRaids = team2ConsecutiveEmptyRaids;
     }
 
-    // --- Existing Getters and Setters ---
+    // --- GETTERS AND SETTERS (Include all previous ones plus these two) ---
     public int getTeam1Points() { return team1Points; }
     public void setTeam1Points(int team1Points) { this.team1Points = team1Points; }
 
@@ -96,7 +100,6 @@ public class KabaddiScore extends Score {
     public int getTeam2SuperTackles() { return team2SuperTackles; }
     public void setTeam2SuperTackles(int team2SuperTackles) { this.team2SuperTackles = team2SuperTackles; }
 
-    // --- NEW Getters and Setters ---
     public int getTeam1TacklePoints() { return team1TacklePoints; }
     public void setTeam1TacklePoints(int team1TacklePoints) { this.team1TacklePoints = team1TacklePoints; }
 
@@ -108,4 +111,10 @@ public class KabaddiScore extends Score {
 
     public int getTeam2AllOuts() { return team2AllOuts; }
     public void setTeam2AllOuts(int team2AllOuts) { this.team2AllOuts = team2AllOuts; }
+
+    public int getTeam1ConsecutiveEmptyRaids() { return team1ConsecutiveEmptyRaids; }
+    public void setTeam1ConsecutiveEmptyRaids(int team1ConsecutiveEmptyRaids) { this.team1ConsecutiveEmptyRaids = team1ConsecutiveEmptyRaids; }
+
+    public int getTeam2ConsecutiveEmptyRaids() { return team2ConsecutiveEmptyRaids; }
+    public void setTeam2ConsecutiveEmptyRaids(int team2ConsecutiveEmptyRaids) { this.team2ConsecutiveEmptyRaids = team2ConsecutiveEmptyRaids; }
 }

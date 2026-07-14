@@ -5,5 +5,5 @@ import com.mits.entity.MatchEvent;
 public interface ScoreUpdateService {
 
     void updateScore(MatchEvent event);
-
+    void reverseScore(MatchEvent event);
 }
