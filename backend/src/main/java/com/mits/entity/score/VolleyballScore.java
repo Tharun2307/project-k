@@ -1,8 +1,10 @@
 package com.mits.entity.score;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import com.mits.entity.Match;
+import com.mits.enums.VolleyballMatchState;
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "volleyball_scores")
@@ -23,25 +25,37 @@ public class VolleyballScore extends Score {
     @Column(nullable = false)
     private int team2Points; // Points in the CURRENT set
 
-    // --- NEW PROFESSIONAL FIELDS ---
-
-    // Each team gets 2 timeouts per set
     @Column(nullable = false)
     private int team1TimeoutsRemaining = 2;
 
     @Column(nullable = false)
     private int team2TimeoutsRemaining = 2;
 
-    // Tracks which team is currently serving (1 for Team 1, 2 for Team 2)
     @Column(nullable = false)
     private int servingTeam = 1; 
 
-    // Flag to easily check if the match has been won (Best of 5 means first to 3 sets)
     @Column(nullable = false)
     private boolean matchOver = false;
 
+    // --- NEW PROFESSIONAL FIELDS ---
+    @Enumerated(EnumType.STRING)
+    private VolleyballMatchState matchState = VolleyballMatchState.FIRST_SET;
+
+    @ElementCollection
+    @CollectionTable(name = "volleyball_score_set_history", joinColumns = @JoinColumn(name = "score_id"))
+    @OrderColumn(name = "set_index")
+    private List<String> setHistory = new ArrayList<>(); // e.g., ["25-22", "20-25"]
+
+    @ElementCollection
+    @CollectionTable(name = "volleyball_score_rally_history", joinColumns = @JoinColumn(name = "score_id"))
+    @OrderColumn(name = "rally_index")
+    private List<String> rallyHistory = new ArrayList<>(); // Last 10 rallies (e.g., "T1: ACE")
+
+    private int sideSwitches = 0; // Tracks side switches (important for 5th set at 8 points)
+    
+    private String result; // e.g., "Team 1 won 3-1"
+
     public VolleyballScore() {
-        // Default initialization for new matches
         this.currentSet = 1;
         this.team1TimeoutsRemaining = 2;
         this.team2TimeoutsRemaining = 2;
@@ -61,8 +75,7 @@ public class VolleyballScore extends Score {
         this.servingTeam = 1;
     }
 
-    // --- Getters and Setters for Original Fields ---
-
+    // --- Getters and Setters ---
     public int getTeam1SetsWon() { return team1SetsWon; }
     public void setTeam1SetsWon(int team1SetsWon) { this.team1SetsWon = team1SetsWon; }
 
@@ -78,8 +91,6 @@ public class VolleyballScore extends Score {
     public int getTeam2Points() { return team2Points; }
     public void setTeam2Points(int team2Points) { this.team2Points = team2Points; }
 
-    // --- Getters and Setters for NEW Fields ---
-
     public int getTeam1TimeoutsRemaining() { return team1TimeoutsRemaining; }
     public void setTeam1TimeoutsRemaining(int team1TimeoutsRemaining) { this.team1TimeoutsRemaining = team1TimeoutsRemaining; }
 
@@ -91,4 +102,19 @@ public class VolleyballScore extends Score {
 
     public boolean isMatchOver() { return matchOver; }
     public void setMatchOver(boolean matchOver) { this.matchOver = matchOver; }
+
+    public VolleyballMatchState getMatchState() { return matchState; }
+    public void setMatchState(VolleyballMatchState matchState) { this.matchState = matchState; }
+
+    public List<String> getSetHistory() { return setHistory; }
+    public void setSetHistory(List<String> setHistory) { this.setHistory = setHistory; }
+
+    public List<String> getRallyHistory() { return rallyHistory; }
+    public void setRallyHistory(List<String> rallyHistory) { this.rallyHistory = rallyHistory; }
+
+    public int getSideSwitches() { return sideSwitches; }
+    public void setSideSwitches(int sideSwitches) { this.sideSwitches = sideSwitches; }
+
+    public String getResult() { return result; }
+    public void setResult(String result) { this.result = result; }
 }

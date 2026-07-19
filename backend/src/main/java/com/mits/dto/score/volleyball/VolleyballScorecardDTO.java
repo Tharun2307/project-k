@@ -1,5 +1,6 @@
 package com.mits.dto.score.volleyball;
 
+import com.mits.enums.VolleyballMatchState;
 import java.util.List;
 
 public class VolleyballScorecardDTO {
@@ -22,7 +23,11 @@ public class VolleyballScorecardDTO {
     private boolean matchOver;
     private String matchStatus; // e.g., "LIVE", "COMPLETED"
     
-    private List<String> recentEvents; // e.g., ["Team A: ACE", "Team B: SPIKE"]
+    private VolleyballMatchState matchState;
+    private List<String> setHistory; // e.g., ["25-22", "20-25"]
+    private List<String> rallyHistory; // Last 10 rallies
+    private int sideSwitches;
+    private String result;
 
     // --- Getters and Setters ---
     public Long getMatchId() { return matchId; }
@@ -64,6 +69,18 @@ public class VolleyballScorecardDTO {
     public String getMatchStatus() { return matchStatus; }
     public void setMatchStatus(String matchStatus) { this.matchStatus = matchStatus; }
 
-    public List<String> getRecentEvents() { return recentEvents; }
-    public void setRecentEvents(List<String> recentEvents) { this.recentEvents = recentEvents; }
+    public VolleyballMatchState getMatchState() { return matchState; }
+    public void setMatchState(VolleyballMatchState matchState) { this.matchState = matchState; }
+
+    public List<String> getSetHistory() { return setHistory; }
+    public void setSetHistory(List<String> setHistory) { this.setHistory = setHistory; }
+
+    public List<String> getRallyHistory() { return rallyHistory; }
+    public void setRallyHistory(List<String> rallyHistory) { this.rallyHistory = rallyHistory; }
+
+    public int getSideSwitches() { return sideSwitches; }
+    public void setSideSwitches(int sideSwitches) { this.sideSwitches = sideSwitches; }
+
+    public String getResult() { return result; }
+    public void setResult(String result) { this.result = result; }
 }
