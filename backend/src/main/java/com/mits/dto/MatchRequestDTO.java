@@ -64,4 +64,14 @@ public class MatchRequestDTO {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    private Integer cricketOvers;
+
+    public Integer getCricketOvers() {
+        return cricketOvers;
+    }
+
+    public void setCricketOvers(Integer cricketOvers) {
+        this.cricketOvers = cricketOvers;
+    }
 }

@@ -19,6 +19,13 @@ public class KabaddiScoreUpdateServiceImpl implements KabaddiScoreUpdateService 
     @Override
     public void processEvent(KabaddiScore score, MatchEvent event, boolean isTeam1) {
         String eventType = event.getEventType().toUpperCase();
+        
+        if ("SWITCH_HALF".equals(eventType) || "NEXT_HALF".equals(eventType)) {
+            score.setCurrentHalf(score.getCurrentHalf() == 1 ? 2 : 1);
+            kabaddiScoreRepository.save(score);
+            return;
+        }
+
         int pointsToAdd = 0;
         boolean resetEmptyRaids = false;
 
@@ -74,9 +81,14 @@ public class KabaddiScoreUpdateServiceImpl implements KabaddiScoreUpdateService 
 
     @Override
     public void reverseEvent(KabaddiScore score, MatchEvent event, boolean isTeam1) {
-        // Simplified reversal: subtracts points based on event type. 
-        // In a production app, you might want more granular reversal logic.
         String eventType = event.getEventType().toUpperCase();
+        
+        if ("SWITCH_HALF".equals(eventType) || "NEXT_HALF".equals(eventType)) {
+            score.setCurrentHalf(score.getCurrentHalf() == 2 ? 1 : 2);
+            kabaddiScoreRepository.save(score);
+            return;
+        }
+
         int pointsToSubtract = 0;
 
         if (eventType.contains("RAID_SUCCESS") || eventType.contains("RAID")) {

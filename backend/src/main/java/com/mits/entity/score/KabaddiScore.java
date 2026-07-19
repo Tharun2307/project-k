@@ -117,4 +117,15 @@ public class KabaddiScore extends Score {
 
     public int getTeam2ConsecutiveEmptyRaids() { return team2ConsecutiveEmptyRaids; }
     public void setTeam2ConsecutiveEmptyRaids(int team2ConsecutiveEmptyRaids) { this.team2ConsecutiveEmptyRaids = team2ConsecutiveEmptyRaids; }
+
+    @jakarta.persistence.Column(nullable = false)
+    private int currentHalf = 1;
+
+    public int getCurrentHalf() {
+        return currentHalf;
+    }
+
+    public void setCurrentHalf(int currentHalf) {
+        this.currentHalf = currentHalf;
+    }
 }

@@ -90,7 +90,7 @@ public class CricketScoringServiceImpl implements CricketScoringService {
             ballSymbol = "4"; runs = 4;
         } else if (eventType.equals("SIX")) {
             ballSymbol = "6"; runs = 6;
-        } else if (eventType.matches("BOWLED|CAUGHT|LBW|RUN_OUT|HIT_WICKET|STUMPED")) {
+        } else if (eventType.matches("WICKET|BOWLED|CAUGHT|LBW|RUN_OUT|HIT_WICKET|STUMPED")) {
             isWicket = true;
             ballSymbol = "W";
         } else if (eventType.equals("SINGLE")) {
@@ -99,6 +99,11 @@ public class CricketScoringServiceImpl implements CricketScoringService {
             runs = 2; ballSymbol = "2";
         } else if (eventType.equals("TRIPLE")) {
             runs = 3; ballSymbol = "3";
+        }
+
+        // Adjust runs for extras if the input was 0
+        if ((eventType.equals("WIDE") || eventType.equals("NO_BALL") || eventType.equals("BYE") || eventType.equals("LEG_BYE")) && runs == 0) {
+            runs = 1;
         }
 
         int battingRuns = runs;
@@ -114,8 +119,17 @@ public class CricketScoringServiceImpl implements CricketScoringService {
         updateTeamScore(score, isTeam1, runs, extraRuns, eventType, isWicket);
         
         if (isLegalBall) {
-            if (isTeam1) score.setTotalLegalBallsTeam1(score.getTotalLegalBallsTeam1() + 1);
-            else score.setTotalLegalBallsTeam2(score.getTotalLegalBallsTeam2() + 1);
+            if (isTeam1) {
+                int nextBalls = score.getTotalLegalBallsTeam1() + 1;
+                score.setTotalLegalBallsTeam1(nextBalls);
+                score.setTeam1Overs(nextBalls / 6);
+                score.setTeam1Balls(nextBalls % 6);
+            } else {
+                int nextBalls = score.getTotalLegalBallsTeam2() + 1;
+                score.setTotalLegalBallsTeam2(nextBalls);
+                score.setTeam2Overs(nextBalls / 6);
+                score.setTeam2Balls(nextBalls % 6);
+            }
         }
 
         if (isLegalBall || eventType.equals("BYE") || eventType.equals("LEG_BYE")) {
@@ -198,7 +212,11 @@ public class CricketScoringServiceImpl implements CricketScoringService {
         
         if (isWicket) {
             stats.setOut(true);
-            stats.setDismissalType(DismissalType.valueOf(event.getEventType().toUpperCase()));
+            try {
+                stats.setDismissalType(DismissalType.valueOf(event.getEventType().toUpperCase()));
+            } catch (IllegalArgumentException ex) {
+                stats.setDismissalType(DismissalType.BOWLED); // Default for generic WICKET
+            }
         }
         stats.setStrikeRate(stats.getBalls() > 0 ? Math.round((stats.getRuns() * 100.0 / stats.getBalls()) * 100.0) / 100.0 : 0.0);
     }

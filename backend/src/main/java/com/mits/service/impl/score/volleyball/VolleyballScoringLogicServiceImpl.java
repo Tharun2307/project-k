@@ -1,11 +1,24 @@
 package com.mits.service.impl.score.volleyball;
 import org.springframework.stereotype.Service;
+import com.mits.entity.Match;
 import com.mits.entity.MatchEvent;
 import com.mits.entity.score.VolleyballScore;
+import com.mits.repository.MatchEventRepository;
+import com.mits.repository.score.VolleyballScoreRepository;
 import com.mits.service.score.volleyball.VolleyballScoringLogicService;
+import java.util.List;
 
 @Service
 public class VolleyballScoringLogicServiceImpl implements VolleyballScoringLogicService {
+
+    private final MatchEventRepository matchEventRepository;
+    private final VolleyballScoreRepository volleyballScoreRepository;
+
+    public VolleyballScoringLogicServiceImpl(MatchEventRepository matchEventRepository,
+                                             VolleyballScoreRepository volleyballScoreRepository) {
+        this.matchEventRepository = matchEventRepository;
+        this.volleyballScoreRepository = volleyballScoreRepository;
+    }
 
     @Override
     public void processVolleyballEvent(MatchEvent event, VolleyballScore score) {
@@ -56,12 +69,12 @@ public class VolleyballScoringLogicServiceImpl implements VolleyballScoringLogic
         boolean team1WinsSet = false;
         boolean team2WinsSet = false;
 
-        // Sets 1 to 4: First to 25 points, must win by 2
-        if (currentSet < 5) {
+        // Sets 1 and 2: First to 25 points, must win by 2
+        if (currentSet < 3) {
             if (points1 >= 25 && (points1 - points2) >= 2) team1WinsSet = true;
             if (points2 >= 25 && (points2 - points1) >= 2) team2WinsSet = true;
         } 
-        // Set 5 (Tiebreaker): First to 15 points, must win by 2
+        // Set 3 (Tiebreaker): First to 15 points, must win by 2
         else {
             if (points1 >= 15 && (points1 - points2) >= 2) team1WinsSet = true;
             if (points2 >= 15 && (points2 - points1) >= 2) team2WinsSet = true;
@@ -76,8 +89,8 @@ public class VolleyballScoringLogicServiceImpl implements VolleyballScoringLogic
             resetForNextSet(score);
         }
 
-        // 5. Check for Match Win (Best of 5: First to 3 sets)
-        if (score.getTeam1SetsWon() == 3 || score.getTeam2SetsWon() == 3) {
+        // 5. Check for Match Win (Best of 3: First to 2 sets)
+        if (score.getTeam1SetsWon() == 2 || score.getTeam2SetsWon() == 2) {
             score.setMatchOver(true);
         }
     }
@@ -91,5 +104,26 @@ public class VolleyballScoringLogicServiceImpl implements VolleyballScoringLogic
         score.setTeam2TimeoutsRemaining(2);
         // Serving team for the new set can be set to the team that just won, 
         // or you can add a coin toss logic later. Defaulting to the winner of the last set.
+    }
+
+    @Override
+    public void recalculateScore(Match match) {
+        VolleyballScore score = volleyballScoreRepository.findByMatch(match)
+                .orElse(new VolleyballScore());
+        score.setTeam1SetsWon(0);
+        score.setTeam2SetsWon(0);
+        score.setCurrentSet(1);
+        score.setTeam1Points(0);
+        score.setTeam2Points(0);
+        score.setTeam1TimeoutsRemaining(2);
+        score.setTeam2TimeoutsRemaining(2);
+        score.setServingTeam(1);
+        score.setMatchOver(false);
+
+        List<MatchEvent> events = matchEventRepository.findByMatchOrderByTimestampAsc(match);
+        for (MatchEvent event : events) {
+            processVolleyballEvent(event, score);
+        }
+        volleyballScoreRepository.save(score);
     }
 }

@@ -26,6 +26,7 @@ public class KabaddiScorecardDTO {
     private int team1DefendersRemaining;
     private int team2DefendersRemaining;
     private String currentLead;
+    private int currentHalf;
 
     // Explicit Constructor
     public KabaddiScorecardDTO(Long matchId, String team1Name, String team2Name,
@@ -33,7 +34,7 @@ public class KabaddiScorecardDTO {
                                int team1BonusPoints, int team1SuperTackles, int team1AllOuts,
                                int team2TotalPoints, int team2RaidPoints, int team2TacklePoints,
                                int team2BonusPoints, int team2SuperTackles, int team2AllOuts,
-                               int team1DefendersRemaining, int team2DefendersRemaining, String currentLead) {
+                               int team1DefendersRemaining, int team2DefendersRemaining, String currentLead, int currentHalf) {
         this.matchId = matchId;
         this.team1Name = team1Name;
         this.team2Name = team2Name;
@@ -52,6 +53,7 @@ public class KabaddiScorecardDTO {
         this.team1DefendersRemaining = team1DefendersRemaining;
         this.team2DefendersRemaining = team2DefendersRemaining;
         this.currentLead = currentLead;
+        this.currentHalf = currentHalf;
     }
 
     // Explicit Getters
@@ -73,4 +75,5 @@ public class KabaddiScorecardDTO {
     public int getTeam1DefendersRemaining() { return team1DefendersRemaining; }
     public int getTeam2DefendersRemaining() { return team2DefendersRemaining; }
     public String getCurrentLead() { return currentLead; }
+    public int getCurrentHalf() { return currentHalf; }
 }

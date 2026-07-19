@@ -66,7 +66,8 @@ public class KabaddiStatsController {
                 score.getTeam1BonusPoints(), score.getTeam1SuperTackles(), score.getTeam1AllOuts(),
                 score.getTeam2Points(), score.getTeam2Raids(), score.getTeam2TacklePoints(),
                 score.getTeam2BonusPoints(), score.getTeam2SuperTackles(), score.getTeam2AllOuts(),
-                team1DefendersRemaining, team2DefendersRemaining, currentLead
+                team1DefendersRemaining, team2DefendersRemaining, currentLead,
+                score.getCurrentHalf()
         );
 
         // 6. Return the response

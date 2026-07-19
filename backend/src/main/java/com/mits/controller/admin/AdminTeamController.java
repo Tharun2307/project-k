@@ -28,6 +28,7 @@ public class AdminTeamController {
     public ResponseEntity<Team> createTeam(@Valid @RequestBody TeamRequestDTO dto) {
         Team team = new Team();
         team.setTeamName(dto.getTeamName());
+        team.setShortName(dto.getShortName());
 
         Sport sport = sportRepository.findById(dto.getSportId())
                 .orElseThrow(() -> new ResourceNotFoundException("Sport", "id", dto.getSportId()));
@@ -43,6 +44,7 @@ public class AdminTeamController {
     public ResponseEntity<Team> updateTeam(@PathVariable Long id, @Valid @RequestBody TeamRequestDTO dto) {
         Team existingTeam = teamService.getTeamById(id);
         existingTeam.setTeamName(dto.getTeamName());
+        existingTeam.setShortName(dto.getShortName());
 
         Sport sport = sportRepository.findById(dto.getSportId())
                 .orElseThrow(() -> new ResourceNotFoundException("Sport", "id", dto.getSportId()));

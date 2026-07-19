@@ -1,0 +1,215 @@
+/* Sportex Custom Styles & Animations */
+
+/* Custom scrollbar hiding utility */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* Glassmorphism panel styling */
+.glass-panel {
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Pulse animation for LIVE badge */
+@keyframes live-pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.4;
+        transform: scale(0.92);
+    }
+}
+
+.live-indicator {
+    animation: live-pulse 2s infinite ease-in-out;
+}
+
+/* Page transitions */
+.fade-in {
+    animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Slide in animation for live feed commentary */
+.slide-in-commentary {
+    animation: slideInCommentary 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInCommentary {
+    from {
+        opacity: 0;
+        transform: translateX(-15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Score update flash indicator */
+@keyframes score-flash {
+    0% {
+        background-color: rgba(34, 197, 94, 0.3);
+        transform: scale(1.05);
+    }
+    100% {
+        background-color: transparent;
+        transform: scale(1);
+    }
+}
+
+.flash-update {
+    animation: score-flash 0.8s ease-out;
+}
+
+/* Premium gradient backgrounds */
+.bg-mesh-dark {
+    background-color: #020617;
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(76, 29, 149, 0.15) 0px, transparent 50%);
+}
+
+.bg-mesh-sport {
+    background-image: 
+        radial-gradient(at 50% 0%, rgba(16, 185, 129, 0.1) 0px, transparent 60%);
+}
+
+/* Custom transitions */
+.transition-card {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.transition-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.5);
+}
+
+/* Custom ranges styling */
+input[type="range"]::-webkit-slider-thumb {
+    background: #10b981;
+}
+
+/* Loading skeleton keyframes */
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+}
+
+/* Light Theme Overrides */
+body.light-theme {
+    background-color: #f8fafc;
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(219, 234, 254, 0.5) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(243, 232, 255, 0.5) 0px, transparent 50%);
+    color: #0f172a;
+}
+
+body.light-theme .glass-panel {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+body.light-theme header,
+body.light-theme aside {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    border-color: #cbd5e1 !important;
+}
+
+body.light-theme header span,
+body.light-theme header a,
+body.light-theme aside span,
+body.light-theme aside h3,
+body.light-theme aside button,
+body.light-theme aside div {
+    color: #1e293b;
+}
+
+body.light-theme aside button:hover {
+    background-color: #e2e8f0 !important;
+}
+
+body.light-theme h1, 
+body.light-theme h2, 
+body.light-theme h3, 
+body.light-theme h4, 
+body.light-theme .text-slate-100, 
+body.light-theme .text-slate-200,
+body.light-theme .text-white {
+    color: #0f172a !important;
+}
+
+body.light-theme .text-slate-300,
+body.light-theme .text-slate-400 {
+    color: #334155 !important;
+}
+
+body.light-theme .bg-slate-900,
+body.light-theme .bg-slate-950,
+body.light-theme .bg-slate-900\/60,
+body.light-theme .bg-slate-900\/50,
+body.light-theme .bg-slate-950\/30,
+body.light-theme .bg-slate-950\/40,
+body.light-theme .bg-slate-950\/60,
+body.light-theme .bg-slate-950\/80 {
+    background-color: #f1f5f9 !important;
+}
+
+body.light-theme .border-slate-800,
+body.light-theme .border-slate-900,
+body.light-theme .border-slate-800\/60,
+body.light-theme .border-slate-800\/80,
+body.light-theme .border-slate-700\/60,
+body.light-theme .border-slate-900\/30 {
+    border-color: #cbd5e1 !important;
+}
+
+body.light-theme .skeleton {
+    background: linear-gradient(90deg, #e2e8f0 25%, #cbd5e1 50%, #e2e8f0 75%);
+    background-size: 200% 100%;
+}
+
+body.light-theme input,
+body.light-theme select,
+body.light-theme textarea {
+    background-color: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+body.light-theme input::placeholder,
+body.light-theme textarea::placeholder {
+    color: #94a3b8 !important;
+}
+

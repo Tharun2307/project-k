@@ -79,4 +79,15 @@ public class BadmintonScore extends Score {
     public void setPlayer2Points(int player2Points) {
         this.player2Points = player2Points;
     }
+
+    @jakarta.persistence.Column(nullable = false)
+    private boolean matchOver = false;
+
+    public boolean isMatchOver() {
+        return matchOver;
+    }
+
+    public void setMatchOver(boolean matchOver) {
+        this.matchOver = matchOver;
+    }
 }

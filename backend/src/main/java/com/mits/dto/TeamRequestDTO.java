@@ -13,6 +13,8 @@ public class TeamRequestDTO {
     @NotNull(message = "Sport ID is required")
     private Long sportId;
 
+    private String shortName;
+
     public TeamRequestDTO() {
     }
 
@@ -30,5 +32,13 @@ public class TeamRequestDTO {
 
     public void setSportId(Long sportId) {
         this.sportId = sportId;
+    }
+
+    public String getShortName() {
+        return shortName;
+    }
+
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
     }
 }

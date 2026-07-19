@@ -1,13 +1,175 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>livescore-frontend</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sportex — Live Scoring & Tournaments</title>
+    
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Custom animations & transitions -->
+    <link rel="stylesheet" href="/css/styles.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- SockJS and Stomp.js for real-time WebSockets -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body class="h-full bg-mesh-dark text-slate-100 flex flex-col font-sans selection:bg-emerald-500/20 selection:text-emerald-400">
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-40 w-full border-b border-slate-900 bg-slate-950/80 backdrop-blur-md">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <a href="#home" class="flex items-center gap-2 group">
+                <div class="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-900/30 group-hover:scale-105 transition-all">
+                    <i data-lucide="activity" class="w-5 h-5 text-white"></i>
+                </div>
+                <span class="font-extrabold text-lg text-white tracking-wide">Sportex</span>
+            </a>
+
+            <!-- Desktop Nav Links -->
+            <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
+                <a href="#home" data-nav="home" class="py-1 border-b-2 transition-all">Home</a>
+                <a href="#matches" data-nav="matches" class="py-1 border-b-2 transition-all">Matches</a>
+            </nav>
+
+            <!-- User Auth Controls -->
+            <div class="flex items-center gap-3">
+                <button id="theme-toggle" class="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-900 border border-slate-900 hover:border-slate-800 rounded-xl transition-all" title="Toggle Light/Dark Mode">
+                    <i data-lucide="sun" id="theme-icon" class="w-4 h-4"></i>
+                </button>
+                <div id="auth-controls" class="flex items-center gap-4">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main id="app-content" class="flex-1 pb-16 md:pb-8">
+        <!-- Content injected by client router -->
+    </main>
+
+    <!-- Mobile Navigation Bar -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/90 border-t border-slate-900 backdrop-blur-md h-16 flex items-center justify-around px-6">
+        <a href="#home" class="flex flex-col items-center justify-center text-slate-400 hover:text-emerald-400 transition-colors">
+            <i data-lucide="home" class="w-5 h-5"></i>
+            <span class="text-[9px] mt-1 font-bold uppercase tracking-wider">Home</span>
+        </a>
+        <a href="#matches" class="flex flex-col items-center justify-center text-slate-400 hover:text-emerald-400 transition-colors">
+            <i data-lucide="play-circle" class="w-5 h-5"></i>
+            <span class="text-[9px] mt-1 font-bold uppercase tracking-wider">Matches</span>
+        </a>
+        <a href="/login.html" id="mobile-auth-btn" class="flex flex-col items-center justify-center text-slate-400 hover:text-emerald-400 transition-colors">
+            <i data-lucide="user" class="w-5 h-5"></i>
+            <span class="text-[9px] mt-1 font-bold uppercase tracking-wider">Dashboard</span>
+        </a>
+    </div>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Main Script Module -->
+    <script type="module">
+        import { handleRoute } from '/js/router.js';
+        import { initLucideIcons } from '/js/utils.js';
+
+        // Bind router hash change
+        window.addEventListener('hashchange', handleRoute);
+        window.addEventListener('DOMContentLoaded', () => {
+            // Theme initialization
+            const theme = localStorage.getItem('theme') || 'dark';
+            const themeIcon = document.getElementById('theme-icon');
+            if (theme === 'light') {
+                document.body.classList.add('light-theme');
+                if (themeIcon) themeIcon.setAttribute('data-lucide', 'moon');
+            } else {
+                document.body.classList.remove('light-theme');
+                if (themeIcon) themeIcon.setAttribute('data-lucide', 'sun');
+            }
+            renderAuthHeader();
+            handleRoute();
+            initLucideIcons();
+        });
+
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            const currentTheme = localStorage.getItem('theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            const themeIcon = document.getElementById('theme-icon');
+            if (newTheme === 'light') {
+                document.body.classList.add('light-theme');
+                if (themeIcon) themeIcon.setAttribute('data-lucide', 'moon');
+            } else {
+                document.body.classList.remove('light-theme');
+                if (themeIcon) themeIcon.setAttribute('data-lucide', 'sun');
+            }
+            initLucideIcons();
+        });
+
+        // Dynamic header updates based on authorization state
+        function renderAuthHeader() {
+            const authDiv = document.getElementById('auth-controls');
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('role');
+            const name = localStorage.getItem('name');
+
+            if (token) {
+                let dashboardLink = '/scoring.html';
+                if (role === 'EVENT_COORDINATOR') {
+                    dashboardLink = '/admin.html';
+                }
+
+                authDiv.innerHTML = `
+                    <div class="flex items-center gap-3.5">
+                        <div class="hidden sm:flex flex-col text-right">
+                            <span class="text-xs font-bold text-slate-200">${name}</span>
+                            <span class="text-[9px] text-slate-500 uppercase font-semibold tracking-wider">${role ? role.replace('ROLE_', '').replace('_', ' ') : 'USER'}</span>
+                        </div>
+                        <a href="${dashboardLink}" class="p-2 bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-xl text-slate-300 hover:text-white transition-colors" title="Dashboard">
+                            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        </a>
+                        <button id="logout-btn" class="px-3.5 py-1.5 bg-rose-950/40 text-rose-400 border border-rose-500/20 hover:bg-rose-600 hover:text-white rounded-xl text-xs font-semibold transition-all">
+                            Log out
+                        </button>
+                    </div>
+                `;
+
+                // Mobile redirect mapping
+                const mobBtn = document.getElementById('mobile-auth-btn');
+                if (mobBtn) {
+                    mobBtn.href = dashboardLink;
+                }
+
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                    localStorage.clear();
+                    window.location.reload();
+                });
+            } else {
+                authDiv.innerHTML = `
+                    <a href="/login.html" class="px-4 py-1.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-500 text-xs font-bold transition-all shadow-md shadow-emerald-950/20">
+                        Sign In
+                    </a>
+                `;
+            }
+            initLucideIcons();
+        }
+    </script>
+</body>
 </html>

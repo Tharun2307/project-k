@@ -94,4 +94,15 @@ public class Match {
     public void setStatus(MatchStatus status) {
         this.status = status;
     }
+
+    // --- Cricket Overs Configuration ---
+    private Integer cricketOvers;
+
+    public Integer getCricketOvers() {
+        return cricketOvers;
+    }
+
+    public void setCricketOvers(Integer cricketOvers) {
+        this.cricketOvers = cricketOvers;
+    }
 }

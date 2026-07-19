@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Umpire Panel — Sportex</title>
+    
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Custom animations & transitions -->
+    <link rel="stylesheet" href="/css/styles.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full bg-mesh-dark text-slate-100 flex flex-col font-sans">
+
+    <!-- Global Layout Wrapper -->
+    <div class="flex h-full overflow-hidden">
+        
+        <!-- Sidebar Navigation (My Matches) -->
+        <aside class="w-80 bg-slate-950 border-r border-slate-900 flex-shrink-0 flex flex-col justify-between overflow-hidden">
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <!-- Header logo -->
+                <div class="h-16 flex items-center justify-between px-6 border-b border-slate-900">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-900/30">
+                            <i data-lucide="activity" class="w-4.5 h-4.5 text-white"></i>
+                        </div>
+                        <span class="font-extrabold text-sm text-white tracking-wide">Umpire Board</span>
+                    </div>
+                    <button id="theme-toggle" class="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-900 border border-slate-900 hover:border-slate-800 rounded-xl transition-all" title="Toggle Light/Dark Mode">
+                        <i data-lucide="sun" id="theme-icon" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <!-- Matches List Section -->
+                <div class="p-4 border-b border-slate-900">
+                    <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Assigned Matches</h3>
+                </div>
+                <div class="flex-1 overflow-y-auto p-4 space-y-3" id="my-matches-list">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+
+            <!-- Profile Info / Logout -->
+            <div class="p-4 border-t border-slate-900 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs text-emerald-400" id="profile-initials">
+                        UM
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-bold text-slate-200" id="profile-name">Umpire</span>
+                        <span class="text-[8px] text-slate-500 font-medium">SPORT ADMIN</span>
+                    </div>
+                </div>
+                <button id="logout-btn" class="p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all" title="Logout">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Scoring Workspace -->
+        <main class="flex-1 flex flex-col overflow-hidden bg-slate-950/20">
+            <!-- Top Header -->
+            <header class="h-16 border-b border-slate-900 bg-slate-950/60 flex items-center justify-between px-8">
+                <h2 class="text-sm font-bold text-slate-200">Live Match Console</h2>
+                <a href="/index.html" class="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors">
+                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Public Portal
+                </a>
+            </header>
+
+            <!-- Active scoring dashboard -->
+            <div class="flex-1 overflow-y-auto p-8 flex flex-col lg:flex-row gap-8" id="console-workspace">
+                <div class="flex-1 flex items-center justify-center text-slate-500 text-xs">
+                    Select an assigned match from the left panel to begin live scoring.
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Umpire Panel Logic -->
+    <script type="module">
+        import { guardPage, logout, getUserProfile } from '/js/auth.js';
+        import { fetchWithAuth } from '/js/api.js';
+        import { showToast, initLucideIcons } from '/js/utils.js';
+
+        // State variables
+        let selectedMatch = null;
+        let selectedScore = null;
+        let recentEvents = [];
+        let assignedMatches = [];
+
+        // Guard this page
+        if (guardPage(['SPORT_ADMIN'])) {
+            const profile = getUserProfile();
+            document.getElementById('profile-name').textContent = profile.name;
+            document.getElementById('profile-initials').textContent = profile.name.slice(0, 2).toUpperCase();
+
+            // Load matches list
+            loadMyMatches();
+
+            // Wire logout click
+            document.getElementById('logout-btn').addEventListener('click', logout);
+
+            // Theme initialization
+            const theme = localStorage.getItem('theme') || 'dark';
+            const themeIcon = document.getElementById('theme-icon');
+            if (theme === 'light') {
+                document.body.classList.add('light-theme');
+                if (themeIcon) themeIcon.setAttribute('data-lucide', 'moon');
+            } else {
+                document.body.classList.remove('light-theme');
+                if (themeIcon) themeIcon.setAttribute('data-lucide', 'sun');
+            }
+            initLucideIcons();
+
+            document.getElementById('theme-toggle').addEventListener('click', () => {
+                const currentTheme = localStorage.getItem('theme') || 'dark';
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                localStorage.setItem('theme', newTheme);
+                const themeIcon = document.getElementById('theme-icon');
+                if (newTheme === 'light') {
+                    document.body.classList.add('light-theme');
+                    if (themeIcon) themeIcon.setAttribute('data-lucide', 'moon');
+                } else {
+                    document.body.classList.remove('light-theme');
+                    if (themeIcon) themeIcon.setAttribute('data-lucide', 'sun');
+                }
+                initLucideIcons();
+            });
+        }
+
+        async function loadMyMatches() {
+            const listContainer = document.getElementById('my-matches-list');
+            listContainer.innerHTML = `
+                <div class="flex justify-center items-center py-10">
+                    <div class="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            `;
+
+            try {
+                // Fetch matches for this specific sport admin
+                assignedMatches = await fetchWithAuth('/sport-admin/my-matches');
+                
+                if (assignedMatches.length === 0) {
+                    listContainer.innerHTML = `<div class="text-center py-6 text-slate-500 text-[10px]">No matches assigned to your sports.</div>`;
+                    return;
+                }
+
+                listContainer.innerHTML = assignedMatches.map(m => `
+                    <button data-match-id="${m.id}" class="w-full text-left p-4 rounded-xl border border-slate-900 bg-slate-900/20 hover:border-slate-800 transition-all flex flex-col justify-between gap-3 text-xs font-semibold">
+                        <div class="flex justify-between items-center w-full">
+                            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] uppercase tracking-wide">${m.sport.sportName}</span>
+                            ${m.status === 'LIVE' ? `
+                                <span class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[8px] uppercase tracking-wider">
+                                    <span class="w-1 h-1 rounded-full bg-rose-400 animate-pulse"></span> Live
+                                </span>
+                            ` : m.status === 'COMPLETED' ? `
+                                <span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 text-[8px] uppercase tracking-wider">Ended</span>
+                            ` : `
+                                <span class="px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[8px] uppercase tracking-wider">Scheduled</span>
+                            `}
+                        </div>
+                        <div class="text-slate-200">
+                            ${m.team1.shortName || m.team1.teamName.substring(0,3).toUpperCase()} vs ${m.team2.shortName || m.team2.teamName.substring(0,3).toUpperCase()}
+                        </div>
+                    </button>
+                `).join('');
+
+                // Wire click events
+                document.querySelectorAll('[data-match-id]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const mId = e.currentTarget.getAttribute('data-match-id');
+                        selectMatchConsole(mId);
+                    });
+                });
+
+                initLucideIcons();
+
+            } catch (err) {
+                listContainer.innerHTML = `<div class="text-center py-6 text-rose-500 text-[10px]">Failed to load matches.</div>`;
+            }
+        }
+
+        async function selectMatchConsole(matchId) {
+            const workspace = document.getElementById('console-workspace');
+            workspace.innerHTML = `
+                <div class="flex-1 flex justify-center items-center py-20">
+                    <div class="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            `;
+
+            try {
+                selectedMatch = assignedMatches.find(m => m.id == matchId) || await fetchWithAuth(`/api/matches/${matchId}`);
+                
+                // Fetch current score
+                try {
+                    selectedScore = await fetchWithAuth(`/api/matches/${matchId}/score`);
+                } catch (e) {
+                    selectedScore = null;
+                }
+
+                // Fetch recent events
+                try {
+                    recentEvents = await fetchWithAuth(`/api/matches/${matchId}/recent-events`);
+                } catch (e) {
+                    recentEvents = [];
+                }
+
+                renderConsole();
+
+            } catch (err) {
+                workspace.innerHTML = `
+                    <div class="flex-1 flex justify-center items-center text-rose-500 text-xs">
+                        Error switching match console: ${err.message}
+                    </div>
+                `;
+            }
+        }
+
+        function renderConsole() {
+            const workspace = document.getElementById('console-workspace');
+            const sportName = selectedMatch.sport.sportName.toUpperCase();
+
+            // Construct score info string
+            let scoreSnippet = '';
+            if (selectedScore) {
+                if (sportName === 'CRICKET') {
+                    scoreSnippet = `${selectedScore.runs || 0}/${selectedScore.wickets || 0} (${selectedScore.overs || 0}.${selectedScore.balls || 0} ov)`;
+                } else if (sportName === 'VOLLEYBALL') {
+                    scoreSnippet = `Sets: ${selectedScore.team1SetsWon || 0} - ${selectedScore.team2SetsWon || 0} (Set ${selectedScore.currentSet || 1}: ${selectedScore.team1Points || 0} - ${selectedScore.team2Points || 0})`;
+                } else if (sportName === 'KABADDI') {
+                    scoreSnippet = `${selectedScore.team1Points || 0} - ${selectedScore.team2Points || 0}`;
+                } else if (sportName === 'BADMINTON') {
+                    scoreSnippet = `Sets: ${selectedScore.team1SetsWon || 0} - ${selectedScore.team2SetsWon || 0} (${selectedScore.team1Points || 0} - ${selectedScore.team2Points || 0})`;
+                }
+            } else {
+                scoreSnippet = 'Score database uninitialized';
+            }
+
+            workspace.innerHTML = `
+                <!-- Main Console Controls -->
+                <div class="flex-1 flex flex-col gap-6 fade-in">
+                    
+                    <!-- Console Header card -->
+                    <div class="p-6 rounded-2xl glass-panel border border-slate-900 bg-slate-900/30 flex justify-between items-center">
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Active Fixture</span>
+                            <h3 class="font-extrabold text-white text-base">${selectedMatch.team1.teamName} <span class="text-slate-500 text-xs">vs</span> ${selectedMatch.team2.teamName}</h3>
+                            <span class="text-xs font-semibold text-emerald-400 mt-1 block">${scoreSnippet}</span>
+                        </div>
+                        <div class="flex gap-2">
+                            ${selectedMatch.status === 'UPCOMING' ? `
+                                <button id="start-match-btn" class="px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-500 text-xs font-bold transition-all flex items-center gap-1">
+                                    <i data-lucide="play" class="w-4 h-4"></i> Start Match
+                                </button>
+                            ` : selectedMatch.status === 'LIVE' ? `
+                                <button id="end-match-btn" class="px-4 py-2 bg-rose-600 text-white rounded-xl hover:bg-rose-500 text-xs font-bold transition-all flex items-center gap-1">
+                                    <i data-lucide="stop-circle" class="w-4 h-4"></i> Complete Match
+                                </button>
+                            ` : `
+                                <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-500 border border-slate-800 text-[10px] font-bold uppercase">Fixture Ended</span>
+                            `}
+                        </div>
+                    </div>
+
+                    <!-- Scoring Button Interfaces (Active only when Match is LIVE) -->
+                    ${selectedMatch.status === 'LIVE' ? `
+                        <div class="p-6 rounded-2xl glass-panel border border-slate-900">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6">Enter Play-by-Play Event</h4>
+                            <div id="sport-scoring-buttons">
+                                ${getScoringFormSnippet(sportName)}
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="p-8 rounded-2xl glass-panel border border-slate-900 text-center text-slate-500 text-xs">
+                            Scoring console is locked. Change status to "LIVE" to begin inputting points.
+                        </div>
+                    `}
+                </div>
+
+                <!-- Recent Events panel -->
+                <div class="w-full lg:w-96 p-6 rounded-2xl glass-panel border border-slate-900 flex flex-col gap-4 overflow-hidden max-h-[600px] fade-in">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-3">Score Feed History</h4>
+                    <div class="flex-1 overflow-y-auto space-y-3 pr-1" id="score-feed-history">
+                        ${recentEvents.length === 0 ? `
+                            <div class="text-center py-10 text-slate-600 text-xs">No events recorded.</div>
+                        ` : recentEvents.map((ev, index) => `
+                            <div class="p-3.5 rounded-xl border border-slate-900 bg-slate-950/40 flex items-start justify-between gap-3 text-xs">
+                                <div>
+                                    <div class="text-slate-300 font-bold uppercase tracking-wide text-[9px] text-emerald-400">${ev.eventType}</div>
+                                    <p class="text-slate-400 text-[11px] mt-1 leading-relaxed">${ev.description}</p>
+                                </div>
+                                ${index === 0 && selectedMatch.status === 'LIVE' ? `
+                                    <button data-undo-event-id="${ev.id}" class="p-1 hover:bg-rose-500/10 text-rose-400 hover:text-rose-300 rounded transition-colors" title="Undo Event">
+                                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            initLucideIcons();
+            wireEvents();
+        }
+
+        function getScoringFormSnippet(sportName) {
+            if (sportName === 'CRICKET') {
+                return `
+                    <form id="scoring-event-form" class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Batting Team</label>
+                                <select id="eventTeamId" required class="w-full px-3 py-2 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl text-xs outline-none">
+                                    <option value="${selectedMatch.team1.id}">${selectedMatch.team1.teamName}</option>
+                                    <option value="${selectedMatch.team2.id}">${selectedMatch.team2.teamName}</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Runs (Runs / Penalty)</label>
+                                <input type="number" id="eventRuns" value="0" min="0" max="6" class="w-full px-3 py-2 bg-slate-900/50 border border-slate-800 focus:border-emerald-500 rounded-xl text-slate-200 text-xs outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Cricket score actions list -->
+                        <div>
+                            <span class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Cricket Scoring Events</span>
+                            <div class="grid grid-cols-3 md:grid-cols-4 gap-2 text-xs font-semibold">
+                                <button type="button" data-score-type="DOT" class="py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-xl transition-all">Dot Ball</button>
+                                <button type="button" data-score-type="SINGLE" class="py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-xl transition-all">Single</button>
+                                <button type="button" data-score-type="FOUR" class="py-2.5 bg-emerald-950/40 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white text-emerald-400 rounded-xl transition-all">Boundary (4)</button>
+                                <button type="button" data-score-type="SIX" class="py-2.5 bg-emerald-950/40 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white text-emerald-400 rounded-xl transition-all">Maximum (6)</button>
+                                <button type="button" data-score-type="WICKET" class="py-2.5 bg-rose-950/40 border border-rose-500/20 hover:bg-rose-600 hover:text-white text-rose-400 rounded-xl transition-all">Wicket</button>
+                                <button type="button" data-score-type="WIDE" class="py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-xl transition-all">Wide</button>
+                                <button type="button" data-score-type="NO_BALL" class="py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-xl transition-all">No Ball</button>
+                                <button type="button" data-score-type="BYE" class="py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-xl transition-all">Bye</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Commentary / Event Description</label>
+                            <input type="text" id="eventDescription" placeholder="e.g. In the slot, hit cleanly over long-on for six."
+                                   class="w-full px-3 py-2.5 bg-slate-900/50 border border-slate-800 focus:border-emerald-500 rounded-xl text-slate-200 text-xs placeholder-slate-600 outline-none">
+                        </div>
+                    </form>
+                `;
+            } 
+            else if (sportName === 'VOLLEYBALL') {
+                return `
+                    <form id="scoring-event-form" class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Scoring Team</label>
+                                <select id="eventTeamId" required class="w-full px-3 py-2 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl text-xs outline-none">
+                                    <option value="${selectedMatch.team1.id}">${selectedMatch.team1.teamName}</option>
+                                    <option value="${selectedMatch.team2.id}">${selectedMatch.team2.teamName}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Scoring Event Options</span>
+                            <div class="grid grid-cols-3 gap-2 text-xs font-semibold">
+                                <button type="button" data-score-type="POINT" class="py-2.5 bg-emerald-950/40 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white text-emerald-400 rounded-xl transition-all">Point Won</button>
+                                <button type="button" data-score-type="ACE" class="py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-xl transition-all">Service Ace</button>
+                                <button type="button" data-score-type="SPIKE" class="py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-xl transition-all">Spike Point</button>
+                                <button type="button" data-score-type="BLOCK" class="py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-xl transition-all">Block Point</button>
+                                <button type="button" data-score-type="TIMEOUT" class="py-2.5 bg-amber-950/40 border border-amber-500/20 hover:bg-amber-500 hover:text-white text-amber-400 rounded-xl transition-all">Timeout Call</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Commentary Description</label>
+                            <input type="text" id="eventDescription" placeholder="e.g. Excellent serve, ace recorded."
+                                   class="w-full px-3 py-2.5 bg-slate-900/50 border border-slate-800 focus:border-emerald-500 rounded-xl text-slate-200 text-xs placeholder-slate-600 outline-none">
+                        </div>
+                    </form>
+                `;
+            }
+            else if (sportName === 'KABADDI') {
+                return `
+                    <form id="scoring-event-form" class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Scoring Team</label>
+                                <select id="eventTeamId" required class="w-full px-3 py-2 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl text-xs outline-none">
+                                    <option value="${selectedMatch.team1.id}">${selectedMatch.team1.teamName}</option>
+                                    <option value="${selectedMatch.team2.id}">${selectedMatch.team2.teamName}</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Tackled Defenders Count (For Raid)</label>
+                                <select id="eventTackledDefenders" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl text-xs outline-none">
+                                    <option value="0">0</option>
+                                    <option value="1" selected>1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="flex items-center gap-2 cursor-pointer select-none">
+                                <input type="checkbox" id="eventIsBonus" class="rounded text-emerald-600 focus:ring-emerald-500/30">
+                                <span class="text-xs text-slate-300 font-medium">Bonus Point?</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer select-none">
+                                <input type="checkbox" id="eventIsDoOrDie" class="rounded text-emerald-600 focus:ring-emerald-500/30">
+                                <span class="text-xs text-slate-300 font-medium">Do or Die?</span>
+                            </label>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Defenders remaining (For Tackle)</label>
+                                <select id="eventDefendersOnCourt" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl text-xs outline-none">
+                                    <option value="7">7</option>
+                                    <option value="6">6</option>
+                                    <option value="5">5</option>
+                                    <option value="4">4</option>
+                                    <option value="3">3 (Super Tackle Eligible)</option>
+                                    <option value="2">2 (Super Tackle Eligible)</option>
+                                    <option value="1">1 (Super Tackle Eligible)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Kabaddi Events</span>
+                            <div class="grid grid-cols-3 gap-2 text-xs font-semibold">
+                                <button type="button" data-score-type="RAID_POINT" class="py-2.5 bg-emerald-950/40 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white text-emerald-400 rounded-xl transition-all">Raid Point</button>
+                                <button type="button" data-score-type="TACKLE_POINT" class="py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-xl transition-all">Tackle Point</button>
+                                <button type="button" data-score-type="BONUS_POINT" class="py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-xl transition-all">Bonus Point</button>
+                                <button type="button" data-score-type="SUPER_TACKLE" class="py-2.5 bg-amber-950/40 border border-amber-500/20 hover:bg-amber-500 hover:text-white text-amber-400 rounded-xl transition-all">Super Tackle</button>
+                                <button type="button" data-score-type="ALL_OUT" class="py-2.5 bg-rose-950/40 border border-rose-500/20 hover:bg-rose-600 hover:text-white text-rose-400 rounded-xl transition-all">All Out</button>
+                                <button type="button" data-score-type="SWITCH_HALF" class="py-2.5 bg-purple-950/40 border border-purple-500/20 hover:bg-purple-600 hover:text-white text-purple-400 rounded-xl transition-all col-span-3">Switch Half (Toggle Half)</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Description</label>
+                            <input type="text" id="eventDescription" placeholder="e.g. Stunning bonus touch point."
+                                   class="w-full px-3 py-2.5 bg-slate-900/50 border border-slate-800 focus:border-emerald-500 rounded-xl text-slate-200 text-xs placeholder-slate-600 outline-none">
+                        </div>
+                    </form>
+                `;
+            }
+            else if (sportName === 'BADMINTON') {
+                return `
+                    <form id="scoring-event-form" class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Scoring Player / Team</label>
+                                <select id="eventTeamId" required class="w-full px-3 py-2 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl text-xs outline-none">
+                                    <option value="${selectedMatch.team1.id}">${selectedMatch.team1.teamName}</option>
+                                    <option value="${selectedMatch.team2.id}">${selectedMatch.team2.teamName}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Badminton Scoring</span>
+                            <div class="grid grid-cols-2 gap-2 text-xs font-semibold">
+                                <button type="button" data-score-type="POINT" class="py-2.5 bg-emerald-950/40 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white text-emerald-400 rounded-xl transition-all">Point Won</button>
+                                <button type="button" data-score-type="ACE" class="py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-xl transition-all">Ace</button>
+                                <button type="button" data-score-type="ERROR" class="py-2.5 bg-rose-950/40 border border-rose-500/20 hover:bg-rose-600 hover:text-white text-rose-400 rounded-xl transition-all">Opponent Error</button>
+                                <button type="button" data-score-type="FAULT" class="py-2.5 bg-rose-950/40 border border-rose-500/20 hover:bg-rose-600 hover:text-white text-rose-400 rounded-xl transition-all">Fault</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Commentary Description</label>
+                            <input type="text" id="eventDescription" placeholder="e.g. Deep smash, unreturnable."
+                                   class="w-full px-3 py-2.5 bg-slate-900/50 border border-slate-800 focus:border-emerald-500 rounded-xl text-slate-200 text-xs placeholder-slate-600 outline-none">
+                        </div>
+                    </form>
+                `;
+            }
+        }
+
+        function wireEvents() {
+            // Start match trigger
+            const startBtn = document.getElementById('start-match-btn');
+            if (startBtn) {
+                startBtn.addEventListener('click', async () => {
+                    await fetchWithAuth(`/sport-admin/${selectedMatch.id}/status?status=LIVE`, { method: 'PATCH' });
+                    showToast('Match initialized live!', 'success');
+                    selectMatchConsole(selectedMatch.id);
+                    loadMyMatches();
+                });
+            }
+
+            // End match trigger
+            const endBtn = document.getElementById('end-match-btn');
+            if (endBtn) {
+                endBtn.addEventListener('click', async () => {
+                    if (confirm('Are you sure you want to end this match? Scorecard locking will apply.')) {
+                        await fetchWithAuth(`/sport-admin/${selectedMatch.id}/status?status=COMPLETED`, { method: 'PATCH' });
+                        showToast('Match completed.', 'info');
+                        selectMatchConsole(selectedMatch.id);
+                        loadMyMatches();
+                    }
+                });
+            }
+
+            // Scoring buttons handlers
+            document.querySelectorAll('[data-score-type]').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const eventType = e.currentTarget.getAttribute('data-score-type');
+                    const teamId = Number(document.getElementById('eventTeamId').value);
+                    const descInput = document.getElementById('eventDescription');
+                    const description = descInput ? descInput.value.trim() : '';
+                    
+                    const runsInput = document.getElementById('eventRuns');
+                    const runs = runsInput ? Number(runsInput.value) : 0;
+
+                    const eventTackled = document.getElementById('eventTackledDefenders');
+                    const eventIsBonus = document.getElementById('eventIsBonus');
+                    const eventDefenders = document.getElementById('eventDefendersOnCourt');
+                    const eventDoOrDie = document.getElementById('eventIsDoOrDie');
+
+                    // Automatically compile some descriptions if empty
+                    const defaultDesc = `Score Event ${eventType} logged for team.`;
+
+                    const payload = {
+                        matchId: selectedMatch.id,
+                        eventType,
+                        teamId,
+                        eventTime: new Date().toISOString(),
+                        description: description || defaultDesc,
+                        runs,
+                        tackledDefendersCount: eventTackled ? Number(eventTackled.value) : null,
+                        isBonusCrossed: eventIsBonus ? eventIsBonus.checked : null,
+                        defendersOnCourt: eventDefenders ? Number(eventDefenders.value) : null,
+                        isDoOrDie: eventDoOrDie ? eventDoOrDie.checked : null
+                    };
+
+                    try {
+                        await fetchWithAuth('/sport-admin/match-events', {
+                            method: 'POST',
+                            body: JSON.stringify(payload)
+                        });
+
+                        showToast(`Logged event: ${eventType}`, 'success');
+                        
+                        // Clear desc field
+                        if (descInput) descInput.value = '';
+
+                        // Refresh score console
+                        selectMatchConsole(selectedMatch.id);
+
+                    } catch (err) {
+                        console.error(err);
+                    }
+                });
+            });
+
+            // Undo event trigger
+            document.querySelectorAll('[data-undo-event-id]').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = e.currentTarget.getAttribute('data-undo-event-id');
+                    if (confirm('Undo last scoring action? Current database scores will roll back.')) {
+                        await fetchWithAuth(`/sport-admin/match-events/${id}`, { method: 'DELETE' });
+                        showToast('Last event rolled back', 'warning');
+                        selectMatchConsole(selectedMatch.id);
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

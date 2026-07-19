@@ -45,7 +45,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         jwt = authHeader.substring(7);
-        email = jwtService.extractUsername(jwt);
+        try {
+            email = jwtService.extractUsername(jwt);
+        } catch (Exception e) {
+            // Token is malformed, expired, or signature mismatched. Proceed as anonymous.
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         if (email != null &&
                 SecurityContextHolder.getContext()

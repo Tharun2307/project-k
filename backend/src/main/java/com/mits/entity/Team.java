@@ -12,6 +12,9 @@ public class Team {
     @Column(nullable = false)
     private String teamName;
 
+    @Column(nullable = true)
+    private String shortName;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sport_id", nullable = false)
     private Sport sport;
@@ -22,6 +25,13 @@ public class Team {
     public Team(Long id, String teamName, Sport sport) {
         this.id = id;
         this.teamName = teamName;
+        this.sport = sport;
+    }
+
+    public Team(Long id, String teamName, String shortName, Sport sport) {
+        this.id = id;
+        this.teamName = teamName;
+        this.shortName = shortName;
         this.sport = sport;
     }
 
@@ -39,6 +49,14 @@ public class Team {
 
     public void setTeamName(String teamName) {
         this.teamName = teamName;
+    }
+
+    public String getShortName() {
+        return shortName;
+    }
+
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
     }
 
     public Sport getSport() {

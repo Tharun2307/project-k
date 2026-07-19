@@ -82,6 +82,7 @@ public class AdminMatchController {
         if (dto.getStatus() != null) {
             existingMatch.setStatus(MatchStatus.valueOf(dto.getStatus().toUpperCase()));
         }
+        existingMatch.setCricketOvers(dto.getCricketOvers());
 
         Match updatedMatch = matchService.updateMatch(id, existingMatch);
         return ResponseEntity.ok(updatedMatch);
@@ -110,6 +111,7 @@ public class AdminMatchController {
         if (dto.getStatus() != null) {
             match.setStatus(MatchStatus.valueOf(dto.getStatus().toUpperCase()));
         }
+        match.setCricketOvers(dto.getCricketOvers());
         return match;
     }
 
@@ -120,6 +122,9 @@ public class AdminMatchController {
             case "CRICKET":
                 CricketScore cScore = new CricketScore();
                 cScore.setMatch(match);
+                if (match.getCricketOvers() != null) {
+                    cScore.setTotalOversInInnings(match.getCricketOvers());
+                }
                 cricketScoreRepository.save(cScore);
                 break;
             case "VOLLEYBALL":
